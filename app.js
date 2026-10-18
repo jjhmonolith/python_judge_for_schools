@@ -30,6 +30,10 @@
   }
 
   function addProblemTestRow(test = {}) {
+    if (document.querySelectorAll(".problem-test-row").length >= 20) {
+      showToast("테스트케이스는 문제당 20개까지 추가할 수 있어요.");
+      return;
+    }
     const row = document.createElement("div");
     row.className = "problem-test-row";
     const inputLabel = document.createElement("label");

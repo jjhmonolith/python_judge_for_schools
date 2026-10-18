@@ -18,3 +18,14 @@
 [  502434ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
 [  502837ms] [ERROR] Failed to load resource: the server responded with a status of 401 () @ https://tqrkp0jyw78bavsd.jitda.io/api/teacher/problems:0
 [  502847ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://tqrkp0jyw78bavsd.jitda.io/problems.js:0
+[  603930ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[  604549ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[  604549ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[  621408ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[  621835ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[  621835ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[  709459ms] [LOG] [vite] server connection lost. Polling for restart... @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[  709485ms] [ERROR] WebSocket connection to 'wss://tqrkp0jyw78bavsd.jitda.io/' failed: Error during WebSocket handshake: Unexpected response code: 503 @ https://tqrkp0jyw78bavsd.jitda.io/@vite/client:1034
+[  711157ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[  711343ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[  711348ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
