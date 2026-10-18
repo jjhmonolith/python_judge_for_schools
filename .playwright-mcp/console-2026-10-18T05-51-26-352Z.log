@@ -1,2 +1,6 @@
 [     386ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
 [   65098ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[  305172ms] [ERROR] WebSocket connection to 'wss://tqrkp0jyw78bavsd.jitda.io:24678/?token=wRgMDnJO1udE' failed: WebSocket opening handshake timed out @ https://tqrkp0jyw78bavsd.jitda.io/@vite/client:801
+[  305172ms] [ERROR] [vite] failed to connect to websocket (Error: WebSocket closed without opened.).  @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[  305174ms] Error: WebSocket closed without opened.
+    at WebSocket.<anonymous> (https://tqrkp0jyw78bavsd.jitda.io/@vite/client:454:22)
