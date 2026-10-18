@@ -1,0 +1,175 @@
+- main [ref=e2]:
+  - paragraph [ref=e3]: Participant directory
+  - heading "참가자 접속 코드" [level=1] [ref=e4]
+  - paragraph [ref=e5]: 이름을 찾고 접속 코드를 바로 확인할 수 있어요.
+  - region "참가자 목록" [ref=e6]:
+    - generic [ref=e7]:
+      - generic [ref=e8]:
+        - strong [ref=e9]: 31명
+        - generic [ref=e10]: 전체 참가자
+      - generic [ref=e11]:
+        - generic [ref=e12]:
+          - img
+          - searchbox "이름 또는 코드 검색" [ref=e13]
+        - button "전체 코드 복사" [ref=e14] [cursor=pointer]
+    - generic [ref=e15]:
+      - generic [ref=e16]: 번호
+      - generic [ref=e17]: 이름
+      - generic [ref=e18]: 접속 코드
+    - generic [ref=e19]:
+      - generic [ref=e20]:
+        - generic [ref=e21]: "01"
+        - generic [ref=e22]: 강성현
+        - generic [ref=e23]: CB3W3Q
+        - button "강성현 코드 복사" [ref=e24] [cursor=pointer]: 복사
+      - generic [ref=e25]:
+        - generic [ref=e26]: "02"
+        - generic [ref=e27]: 강현수
+        - generic [ref=e28]: APPKPK
+        - button "강현수 코드 복사" [ref=e29] [cursor=pointer]: 복사
+      - generic [ref=e30]:
+        - generic [ref=e31]: "03"
+        - generic [ref=e32]: 김나경
+        - generic [ref=e33]: APCFT9
+        - button "김나경 코드 복사" [ref=e34] [cursor=pointer]: 복사
+      - generic [ref=e35]:
+        - generic [ref=e36]: "04"
+        - generic [ref=e37]: 김선민
+        - generic [ref=e38]: 8GXWYB
+        - button "김선민 코드 복사" [ref=e39] [cursor=pointer]: 복사
+      - generic [ref=e40]:
+        - generic [ref=e41]: "05"
+        - generic [ref=e42]: 김수진
+        - generic [ref=e43]: TEH8NX
+        - button "김수진 코드 복사" [ref=e44] [cursor=pointer]: 복사
+      - generic [ref=e45]:
+        - generic [ref=e46]: "06"
+        - generic [ref=e47]: 김인하
+        - generic [ref=e48]: ZNQWAK
+        - button "김인하 코드 복사" [ref=e49] [cursor=pointer]: 복사
+      - generic [ref=e50]:
+        - generic [ref=e51]: "07"
+        - generic [ref=e52]: 김지훈
+        - generic [ref=e53]: 4S8DF5
+        - button "김지훈 코드 복사" [ref=e54] [cursor=pointer]: 복사
+      - generic [ref=e55]:
+        - generic [ref=e56]: "08"
+        - generic [ref=e57]: 노용철
+        - generic [ref=e58]: TV2RB9
+        - button "노용철 코드 복사" [ref=e59] [cursor=pointer]: 복사
+      - generic [ref=e60]:
+        - generic [ref=e61]: "09"
+        - generic [ref=e62]: 문미례
+        - generic [ref=e63]: CR35JN
+        - button "문미례 코드 복사" [ref=e64] [cursor=pointer]: 복사
+      - generic [ref=e65]:
+        - generic [ref=e66]: "10"
+        - generic [ref=e67]: 박도연
+        - generic [ref=e68]: X8PMS3
+        - button "박도연 코드 복사" [ref=e69] [cursor=pointer]: 복사
+      - generic [ref=e70]:
+        - generic [ref=e71]: "11"
+        - generic [ref=e72]: 박영균
+        - generic [ref=e73]: GCX3ST
+        - button "박영균 코드 복사" [ref=e74] [cursor=pointer]: 복사
+      - generic [ref=e75]:
+        - generic [ref=e76]: "12"
+        - generic [ref=e77]: 박주은
+        - generic [ref=e78]: 5ZHX6W
+        - button "박주은 코드 복사" [ref=e79] [cursor=pointer]: 복사
+      - generic [ref=e80]:
+        - generic [ref=e81]: "13"
+        - generic [ref=e82]: 박희정
+        - generic [ref=e83]: CZPDQD
+        - button "박희정 코드 복사" [ref=e84] [cursor=pointer]: 복사
+      - generic [ref=e85]:
+        - generic [ref=e86]: "14"
+        - generic [ref=e87]: 백명주
+        - generic [ref=e88]: D9QMVC
+        - button "백명주 코드 복사" [ref=e89] [cursor=pointer]: 복사
+      - generic [ref=e90]:
+        - generic [ref=e91]: "15"
+        - generic [ref=e92]: 신권익
+        - generic [ref=e93]: Z2A5HR
+        - button "신권익 코드 복사" [ref=e94] [cursor=pointer]: 복사
+      - generic [ref=e95]:
+        - generic [ref=e96]: "16"
+        - generic [ref=e97]: 양승욱
+        - generic [ref=e98]: 2E6DAR
+        - button "양승욱 코드 복사" [ref=e99] [cursor=pointer]: 복사
+      - generic [ref=e100]:
+        - generic [ref=e101]: "17"
+        - generic [ref=e102]: 오상희
+        - generic [ref=e103]: U8DYS4
+        - button "오상희 코드 복사" [ref=e104] [cursor=pointer]: 복사
+      - generic [ref=e105]:
+        - generic [ref=e106]: "18"
+        - generic [ref=e107]: 위지연
+        - generic [ref=e108]: RMFCBD
+        - button "위지연 코드 복사" [ref=e109] [cursor=pointer]: 복사
+      - generic [ref=e110]:
+        - generic [ref=e111]: "19"
+        - generic [ref=e112]: 유재식
+        - generic [ref=e113]: TFMYYT
+        - button "유재식 코드 복사" [ref=e114] [cursor=pointer]: 복사
+      - generic [ref=e115]:
+        - generic [ref=e116]: "20"
+        - generic [ref=e117]: 이미경
+        - generic [ref=e118]: ZN97SK
+        - button "이미경 코드 복사" [ref=e119] [cursor=pointer]: 복사
+      - generic [ref=e120]:
+        - generic [ref=e121]: "21"
+        - generic [ref=e122]: 이성춘
+        - generic [ref=e123]: YBD73Z
+        - button "이성춘 코드 복사" [ref=e124] [cursor=pointer]: 복사
+      - generic [ref=e125]:
+        - generic [ref=e126]: "22"
+        - generic [ref=e127]: 이진수
+        - generic [ref=e128]: AU5AWH
+        - button "이진수 코드 복사" [ref=e129] [cursor=pointer]: 복사
+      - generic [ref=e130]:
+        - generic [ref=e131]: "23"
+        - generic [ref=e132]: 이청현
+        - generic [ref=e133]: AZBN2X
+        - button "이청현 코드 복사" [ref=e134] [cursor=pointer]: 복사
+      - generic [ref=e135]:
+        - generic [ref=e136]: "24"
+        - generic [ref=e137]: 이호준
+        - generic [ref=e138]: DAR2BP
+        - button "이호준 코드 복사" [ref=e139] [cursor=pointer]: 복사
+      - generic [ref=e140]:
+        - generic [ref=e141]: "25"
+        - generic [ref=e142]: 전종현_참가자
+        - generic [ref=e143]: V94ZWG
+        - button "전종현 참가자 코드 복사" [ref=e144] [cursor=pointer]: 복사
+      - generic [ref=e145]:
+        - generic [ref=e146]: "26"
+        - generic [ref=e147]: 전지혜
+        - generic [ref=e148]: F8XJX4
+        - button "전지혜 코드 복사" [ref=e149] [cursor=pointer]: 복사
+      - generic [ref=e150]:
+        - generic [ref=e151]: "27"
+        - generic [ref=e152]: 전혜윤
+        - generic [ref=e153]: F8NZ6Z
+        - button "전혜윤 코드 복사" [ref=e154] [cursor=pointer]: 복사
+      - generic [ref=e155]:
+        - generic [ref=e156]: "28"
+        - generic [ref=e157]: 정혜인
+        - generic [ref=e158]: NME2XQ
+        - button "정혜인 코드 복사" [ref=e159] [cursor=pointer]: 복사
+      - generic [ref=e160]:
+        - generic [ref=e161]: "29"
+        - generic [ref=e162]: 조정익
+        - generic [ref=e163]: GVT6A2
+        - button "조정익 코드 복사" [ref=e164] [cursor=pointer]: 복사
+      - generic [ref=e165]:
+        - generic [ref=e166]: "30"
+        - generic [ref=e167]: 최승희
+        - generic [ref=e168]: ADZ7G7
+        - button "최승희 코드 복사" [ref=e169] [cursor=pointer]: 복사
+      - generic [ref=e170]:
+        - generic [ref=e171]: "31"
+        - generic [ref=e172]: 황정호
+        - generic [ref=e173]: YAAUUD
+        - button "황정호 코드 복사" [ref=e174] [cursor=pointer]: 복사
+  - paragraph [ref=e175]: 접속 코드는 참가자에게만 안전하게 공유해 주세요.

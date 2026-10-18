@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f2ed">
+  <title>코드연습장 | 파이썬 저지</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="editor.css">
+  <link rel="stylesheet" href="account.css">
+  <script type="module" src="/app.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="코드연습장 홈">
+      <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M12 9 5 16l7 7M20 9l7 7-7 7M18 6l-4 20"/></svg></span>
+      <span>코드연습장<span class="brand-dot">.</span></span>
+    </a>
+    <div class="topbar-center"><span class="live-dot"></span> 파이썬 기초 트랙 <span class="topbar-divider">/</span> 혼자 풀기</div>
+    <div class="topbar-right">
+      <div class="streak"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2c1 4-3 5-2 8 1-1 2-2 2-3 3 2 5 5 3 8a4 4 0 0 1-7-1c-1-4 2-6 4-12Z"/></svg><span id="solved-count">0</span><span class="streak-label">/ 10 완료</span></div>
+      <button class="account-button" id="account-button" type="button">로그인</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="sidebar" aria-label="문제 목록">
+      <div class="sidebar-heading"><div><span class="eyebrow">PYTHON · STARTER</span><h1>오늘의 연습</h1></div><span class="total-pill">10 문제</span></div>
+      <div class="track-progress"><div class="progress-copy"><span>트랙 진행률</span><span id="progress-label">0%</span></div><div class="progress-rail"><span id="progress-bar"></span></div></div>
+      <div class="problem-list" id="problem-list"></div>
+      <div class="sidebar-note"><span class="note-icon" aria-hidden="true">i</span><p>정답을 제출하면 다음 문제가 열려요. 풀었던 문제는 언제든 다시 볼 수 있어요.</p></div>
+      <div class="sidebar-footer"><span class="tiny-mark">{ }</span><span>매일 조금씩, 한 줄씩</span></div>
+    </aside>
+
+    <section class="workspace" aria-label="문제 풀이">
+      <div class="workspace-topline"><div class="breadcrumbs"><span>기초 문법</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m6 3 5 5-5 5"/></svg><span id="breadcrumb-title">문제 01</span></div><button class="icon-button help-button" id="help-button" type="button" aria-label="도움말 보기" title="도움말 보기">?</button></div>
+      <div class="workspace-grid">
+        <article class="problem-panel">
+          <div class="problem-meta"><span class="problem-number" id="problem-number">01</span><span class="difficulty" id="difficulty">입문</span><span class="meta-dot">·</span><span class="time-limit">시간 제한 1초</span></div>
+          <h2 id="problem-title">두 수의 합</h2>
+          <div class="problem-tags" id="problem-tags"></div>
+          <div class="statement" id="problem-description"></div>
+          <div class="io-section"><h3><span class="io-icon input-icon">↓</span> 입력</h3><p id="problem-input"></p></div>
+          <div class="io-section"><h3><span class="io-icon output-icon">↑</span> 출력</h3><p id="problem-output"></p></div>
+          <div class="example-card"><div class="example-heading"><span>예제 입력</span><span>예제 출력</span></div><div class="example-content"><pre id="sample-input"></pre><pre id="sample-output"></pre></div></div>
+          <div class="hint-row" id="hint-row"><span class="bulb" aria-hidden="true">✳</span><span class="hint-label">힌트</span><span id="problem-hint"></span></div>
+          <div class="problem-navigation"><button class="nav-button" id="prev-button" type="button"><span aria-hidden="true">←</span> 이전 문제</button><span id="problem-position">01 / 10</span><button class="nav-button next-nav" id="next-button" type="button">다음 문제 <span aria-hidden="true">→</span></button></div>
+        </article>
+
+        <section class="editor-panel" aria-label="파이썬 코드 편집기">
+          <div class="editor-head"><div class="editor-title"><span class="file-icon">Py</span><span>solution.py</span><span class="unsaved-dot" id="unsaved-dot" hidden></span></div><div class="language-label"><span class="python-mark">●</span> Python 3</div></div>
+          <div class="editor-toolbar"><span class="editor-mode"><span class="mode-dot"></span> 편집 중</span><div class="editor-actions"><button class="answer-button" id="answer-button" type="button" title="현재 문제의 모범답안을 편집기에 입력합니다."><span aria-hidden="true">{ }</span> 모범 답안 입력</button><button class="reset-button" id="reset-button" type="button"><svg viewBox="0 0 18 18" aria-hidden="true"><path d="M3 8a6 6 0 1 1 1 4M3 3v5h5"/></svg> 초기화</button></div></div>
+          <div class="code-area"><div class="line-numbers" id="line-numbers" aria-hidden="true">1</div><textarea id="code-editor" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" aria-label="파이썬 코드 입력" wrap="off"></textarea></div>
+          <div class="editor-foot"><span><kbd>⌘</kbd><kbd>Enter</kbd> 제출하기</span><span id="line-count">1줄</span></div>
+          <div class="submit-area"><button class="run-sample-button" id="sample-button" type="button"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 4.5 15 10l-8 5.5z"/></svg> 예제 실행</button><button class="submit-button" id="submit-button" type="button"><span class="submit-label">정답 제출</span><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M10 5l5 5-5 5"/></svg></button></div>
+          <div class="result-panel" id="result-panel" aria-live="polite" hidden></div>
+          <div class="editor-caption"><span class="lock-icon" aria-hidden="true">⌑</span> 코드는 브라우저 안에서 실행돼요</div>
+        </section>
+      </div>
+      <footer class="workspace-footer"><span>막히면 예제부터 실행해 보세요.</span><span id="save-location">기록은 이 기기에 자동 저장됩니다 <span class="save-check">✓</span></span></footer>
+    </section>
+  </main>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <dialog class="help-dialog" id="help-dialog"><button class="dialog-close" id="dialog-close" aria-label="닫기" type="button">×</button><span class="eyebrow">빠른 안내</span><h2>어떻게 풀면 되나요?</h2><p>문제를 읽고 오른쪽 편집기에 파이썬 코드를 작성해 주세요. 입력은 표준 입력으로, 답은 표준 출력으로 처리합니다.</p><div class="help-steps"><div><span>01</span><p>예제 실행으로 입력과 출력을 먼저 확인해요.</p></div><div><span>02</span><p>정답 제출을 누르면 여러 테스트케이스로 채점해요.</p></div><div><span>03</span><p>모든 테스트를 통과하면 다음 문제가 열려요.</p></div></div><p class="help-footnote">코드는 내 기기의 브라우저 안에서만 실행됩니다.</p></dialog>
+  <dialog class="help-dialog account-dialog" id="account-dialog">
+    <button class="dialog-close" id="account-dialog-close" aria-label="닫기" type="button">×</button>
+    <span class="eyebrow">학생 계정</span>
+    <h2 id="account-title">로그인</h2>
+    <p id="account-description">아이디와 6자리 PIN으로 학습 기록을 이어가세요.</p>
+    <form id="account-form">
+      <label class="account-label" for="account-username">아이디</label>
+      <input class="account-input" id="account-username" name="username" type="text" pattern="[A-Za-z0-9_]{3,20}" minlength="3" maxlength="20" autocomplete="username" autocapitalize="off" spellcheck="false" required>
+      <label class="account-label" id="pin-label" for="account-pin">6자리 PIN</label>
+      <input class="account-input" id="account-pin" name="pin" type="password" inputmode="numeric" pattern="[0-9]{6}" minlength="6" maxlength="6" autocomplete="current-password" required>
+      <div class="recovery-field" id="recovery-field" hidden>
+        <label class="account-label" for="recovery-input">복구 코드</label>
+        <input class="account-input" id="recovery-input" type="text" maxlength="12" autocapitalize="characters" autocomplete="off">
+      </div>
+      <button class="account-submit" id="account-submit" type="submit">로그인</button>
+    </form>
+    <div class="account-links"><button id="account-switch" type="button">처음 이용하나요? 계정 만들기</button><button id="forgot-pin-button" type="button">PIN을 잊으셨나요?</button></div>
+    <div class="recovery-panel" id="recovery-panel" hidden>
+      <p>이 복구 코드는 한 번만 보여요. 안전한 곳에 적어 두세요.</p>
+      <code id="recovery-code"></code>
+      <button id="copy-recovery-code" type="button">복구 코드 복사</button>
+    </div>
+    <p class="account-note" id="account-note">아이디는 영문 소문자, 숫자, 밑줄 3~20자이며 PIN은 6자리 숫자예요. 복구 코드는 PIN을 잊었을 때 필요합니다.</p>
+  </dialog>
+</body>
+</html>

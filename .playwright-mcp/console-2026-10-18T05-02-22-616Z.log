@@ -1,0 +1,29 @@
+[     524ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[   57612ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[  690262ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[  690658ms] TypeError: Cannot read properties of null (reading 'addEventListener')
+    at https://tqrkp0jyw78bavsd.jitda.io/app.js:368:22
+    at https://tqrkp0jyw78bavsd.jitda.io/app.js:384:3
+[  711613ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[  711845ms] TypeError: Cannot read properties of null (reading 'addEventListener')
+    at https://tqrkp0jyw78bavsd.jitda.io/app.js?t=1792300454074:473:22
+    at https://tqrkp0jyw78bavsd.jitda.io/app.js?t=1792300454074:489:3
+[  739511ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[  739828ms] TypeError: Cannot read properties of null (reading 'addEventListener')
+    at https://tqrkp0jyw78bavsd.jitda.io/app.js?t=1792300481888:476:22
+    at https://tqrkp0jyw78bavsd.jitda.io/app.js?t=1792300481888:492:3
+[  751916ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[  752237ms] TypeError: Cannot read properties of null (reading 'addEventListener')
+    at https://tqrkp0jyw78bavsd.jitda.io/app.js?t=1792300481888:476:22
+    at https://tqrkp0jyw78bavsd.jitda.io/app.js?t=1792300481888:492:3
+[  758805ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[  805016ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[  845206ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[  866536ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[  896110ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[  914923ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[  923814ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://gqyptziocmbuxbvxlsdv.supabase.co/rest/v1/rest/v1/rpc/student_login:0
+[  966032ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[  988234ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[  996226ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[ 1092411ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
