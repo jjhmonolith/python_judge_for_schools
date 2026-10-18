@@ -3,7 +3,7 @@ import { PROBLEMS } from "./problems.js";
 
 (() => {
   const problems = PROBLEMS;
-  const supabaseUrl = __SUPABASE_URL__;
+  const supabaseUrl = __SUPABASE_URL__.trim().replace(/\/rest\/v1\/?$/i, "").replace(/\/+$/, "");
   const supabasePublishableKey = __SUPABASE_PUBLISHABLE_KEY__;
   const supabase = supabaseUrl && supabasePublishableKey ? createClient(supabaseUrl, supabasePublishableKey) : null;
   const $ = (selector) => document.querySelector(selector);

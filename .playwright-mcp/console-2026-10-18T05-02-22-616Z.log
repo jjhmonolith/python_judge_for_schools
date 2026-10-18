@@ -30,3 +30,14 @@
 [ 1306582ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
 [ 1414881ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://gqyptziocmbuxbvxlsdv.supabase.co/rest/v1/rest/v1/rpc/student_login:0
 [ 1433844ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[ 1501306ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[ 1501868ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://gqyptziocmbuxbvxlsdv.supabase.co/rest/v1/rest/v1/rpc/student_login:0
+[ 1518957ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[ 1524427ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[ 1524953ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://gqyptziocmbuxbvxlsdv.supabase.co/rest/v1/rest/v1/rpc/student_login:0
+[ 1524955ms] [WARNING] Student account RPC failed: PGRST125 Invalid path specified in request URL @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[ 1551929ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[ 1558104ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[ 1577449ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[ 1623556ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[ 1629427ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
