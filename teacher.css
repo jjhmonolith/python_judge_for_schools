@@ -1,0 +1,172 @@
+.role-select {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 4px;
+  margin: 15px 0;
+  border-radius: 6px;
+  background: #f1f0ea;
+}
+
+.role-select button {
+  min-height: 36px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #73766d;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.role-select button.active {
+  background: #fffefa;
+  color: #3f6d55;
+  box-shadow: 0 1px 3px #2221;
+}
+
+.teacher-dialog {
+  width: min(560px, calc(100% - 28px));
+  max-width: 560px;
+  max-height: min(90vh, 760px);
+  overflow-y: auto;
+}
+
+.teacher-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 15px;
+}
+
+.teacher-title-row h2 {
+  margin-bottom: 4px;
+}
+
+.teacher-title-row p {
+  margin: 0;
+  color: #73766d;
+  font-size: 11px;
+}
+
+.teacher-count {
+  flex: none;
+  padding: 6px 10px;
+  border-radius: 14px;
+  background: #edf3ec;
+  color: #496c50;
+  font: 11px var(--mono);
+}
+
+.teacher-student-list {
+  display: grid;
+  gap: 8px;
+  max-height: 240px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.teacher-student-card {
+  padding: 11px;
+  border: 1px solid #e6e5dd;
+  border-radius: 6px;
+  background: #fffefa;
+}
+
+.teacher-student-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.teacher-student-top div {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.teacher-student-top strong {
+  color: #41473f;
+  font-size: 12px;
+}
+
+.teacher-student-top span,
+.teacher-student-card small {
+  color: #85877e;
+  font-size: 9px;
+}
+
+.teacher-student-top button {
+  flex: none;
+  min-height: 32px;
+  padding: 0 9px;
+  border: 1px solid #e2dfd7;
+  border-radius: 4px;
+  background: #fffefa;
+  color: #87634b;
+  font-size: 9px;
+}
+
+.teacher-student-top button:hover {
+  background: #faf1e9;
+}
+
+.teacher-progress {
+  height: 4px;
+  margin: 9px 0 6px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: #eeede7;
+}
+
+.teacher-progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #6c9470;
+}
+
+.teacher-student-card small {
+  display: block;
+}
+
+.teacher-empty {
+  margin: 10px 0;
+  color: #888a82;
+  font-size: 11px;
+}
+
+.teacher-form {
+  display: grid;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid #e9e7e0;
+}
+
+.teacher-form[hidden] {
+  display: none !important;
+}
+
+.teacher-form h3 {
+  margin: 0 0 3px;
+  color: #494e46;
+  font-size: 12px;
+}
+
+.teacher-logout {
+  min-height: 36px;
+  margin-top: 8px;
+  padding: 0 12px;
+  border: 1px solid #e1dfd8;
+  border-radius: 5px;
+  background: transparent;
+  color: #76786f;
+  font-size: 10px;
+}
+
+.teacher-logout:hover {
+  background: #f4f2ed;
+}

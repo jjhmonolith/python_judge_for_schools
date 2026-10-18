@@ -1,0 +1,48 @@
+[     302ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[     503ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[     608ms] [ERROR] Failed to load resource: the server responded with a status of 401 () @ https://tqrkp0jyw78bavsd.jitda.io/api/auth/me:0
+[   15202ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[   15493ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[   15689ms] [ERROR] Failed to load resource: the server responded with a status of 401 () @ https://tqrkp0jyw78bavsd.jitda.io/api/auth/me:0
+[   28246ms] [LOG] [vite] server connection lost. Polling for restart... @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[   28257ms] [ERROR] WebSocket connection to 'wss://tqrkp0jyw78bavsd.jitda.io/' failed: Error during WebSocket handshake: Unexpected response code: 503 @ https://tqrkp0jyw78bavsd.jitda.io/@vite/client:1034
+[   29807ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[   30073ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[   35949ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[   36116ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[   54029ms] [LOG] [vite] server connection lost. Polling for restart... @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[   54036ms] [ERROR] WebSocket connection to 'wss://tqrkp0jyw78bavsd.jitda.io/' failed: Error during WebSocket handshake: Unexpected response code: 503 @ https://tqrkp0jyw78bavsd.jitda.io/@vite/client:1034
+[   55403ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[   55604ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[   60912ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[   61164ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[   62131ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://tqrkp0jyw78bavsd.jitda.io/data/students.json:0
+[   77369ms] [ERROR] Failed to load resource: the server responded with a status of 409 () @ https://tqrkp0jyw78bavsd.jitda.io/api/teacher/students:0
+[  158828ms] [LOG] [vite] server connection lost. Polling for restart... @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[  158840ms] [ERROR] WebSocket connection to 'wss://tqrkp0jyw78bavsd.jitda.io/' failed: Error during WebSocket handshake: Unexpected response code: 503 @ https://tqrkp0jyw78bavsd.jitda.io/@vite/client:1034
+[  160691ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[  160997ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[  168502ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[  168792ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[  169489ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://tqrkp0jyw78bavsd.jitda.io/api/teacher/students:0
+[  197814ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://tqrkp0jyw78bavsd.jitda.io/data/students.json:0
+[  197830ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://tqrkp0jyw78bavsd.jitda.io/@fs/home/jovyan/fs/teams/2045/project-directory/data/students.json:0
+[  233174ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[  233316ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[  233316ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[  241089ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[  241294ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[  241295ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[  257394ms] [LOG] [vite] server connection lost. Polling for restart... @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[  257412ms] [ERROR] WebSocket connection to 'wss://tqrkp0jyw78bavsd.jitda.io/' failed: Error during WebSocket handshake: Unexpected response code: 503 @ https://tqrkp0jyw78bavsd.jitda.io/@vite/client:1034
+[  258897ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[  259087ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[  259087ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[  268619ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[  268817ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[  268817ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[  269274ms] [ERROR] Failed to load resource: the server responded with a status of 401 () @ https://tqrkp0jyw78bavsd.jitda.io/api/auth/login:0
+[  269672ms] [ERROR] Failed to load resource: the server responded with a status of 409 () @ https://tqrkp0jyw78bavsd.jitda.io/api/teacher/students:0
+[  311930ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[  312123ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[  312123ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0

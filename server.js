@@ -1,14 +1,24 @@
 import { createServer } from "node:http";
-import { readFile, stat } from "node:fs/promises";
+import { mkdir, readFile, rename, stat, writeFile } from "node:fs/promises";
 import { extname, resolve, sep } from "node:path";
+import { randomBytes, randomUUID, scryptSync, timingSafeEqual } from "node:crypto";
 import { createServer as createViteServer, loadEnv } from "vite";
 import { PROBLEMS } from "./problems.js";
 
 const root = process.cwd();
 const production = process.argv.includes("--production");
-const env = loadEnv(production ? "production" : "development", root, "");
+const env = loadEnv(production ? "production" : "development", root, "OPENAI_");
 const openAiKey = process.env.OPENAI_API_KEY || env.OPENAI_API_KEY || "";
 const buckets = new Map();
+const loginBuckets = new Map();
+const sessions = new Map();
+const dataDirectory = resolve(root, "data");
+const studentDbPath = resolve(dataDirectory, "students.json");
+const teacherDbPath = resolve(dataDirectory, "teachers.json");
+let studentDb;
+let teacherDb;
+let studentWriteQueue = Promise.resolve();
+let teacherWriteQueue = Promise.resolve();
 const responseSchema = {
   type: "object",
   properties: {
@@ -51,14 +61,14 @@ function isRateLimited(req) {
   return bucket.count > 60;
 }
 
-function readRequestBody(req) {
+function readRequestBody(req, maxBytes = 24_000) {
   return new Promise((resolveBody, reject) => {
     let body = "";
     let tooLarge = false;
     req.on("data", (chunk) => {
       if (tooLarge) return;
       body += chunk;
-      if (body.length > 24_000) {
+      if (body.length > maxBytes) {
         tooLarge = true;
         reject(new Error("body_too_large"));
       }
@@ -70,6 +80,128 @@ function readRequestBody(req) {
     });
     req.on("error", reject);
   });
+}
+
+function makeAccount(username, pin, id = randomUUID(), demo = false) {
+  const pinSalt = randomBytes(16).toString("hex");
+  return {
+    id,
+    username,
+    pinSalt,
+    pinHash: scryptSync(pin, Buffer.from(pinSalt, "hex"), 64).toString("hex"),
+    createdAt: new Date().toISOString(),
+    demo
+  };
+}
+
+async function loadDatabase(path, seed) {
+  try { return JSON.parse(await readFile(path, "utf8")); }
+  catch (error) {
+    if (error.code !== "ENOENT") throw error;
+    const database = seed();
+    await writeFile(path, JSON.stringify(database, null, 2), { mode: 0o600 });
+    return database;
+  }
+}
+
+async function atomicWrite(path, contents) {
+  const temporaryPath = `${path}.${process.pid}.${randomBytes(4).toString("hex")}.tmp`;
+  await writeFile(temporaryPath, contents, { mode: 0o600 });
+  await rename(temporaryPath, path);
+}
+
+async function persistStudents() {
+  studentWriteQueue = studentWriteQueue.then(async () => {
+    await atomicWrite(studentDbPath, JSON.stringify(studentDb, null, 2));
+  });
+  return studentWriteQueue;
+}
+
+async function persistTeachers() {
+  teacherWriteQueue = teacherWriteQueue.then(async () => {
+    await atomicWrite(teacherDbPath, JSON.stringify(teacherDb, null, 2));
+  });
+  return teacherWriteQueue;
+}
+
+async function initializeDatabases() {
+  await mkdir(dataDirectory, { recursive: true, mode: 0o700 });
+  studentDb = await loadDatabase(studentDbPath, () => {
+    const accounts = [
+      makeAccount("student01", "111111", "student-001", true),
+      makeAccount("student02", "222222", "student-002", true),
+      makeAccount("student03", "333333", "student-003", true)
+    ];
+    const progress = Object.fromEntries(accounts.map((account) => [account.id, {
+      current: 0,
+      solved: [],
+      codes: {},
+      updatedAt: null
+    }]));
+    return { accounts, progress };
+  });
+  teacherDb = await loadDatabase(teacherDbPath, () => ({
+    accounts: [makeAccount("teacher", "999999", "teacher-001", true)]
+  }));
+  studentDb.progress ||= {};
+  for (const account of studentDb.accounts) {
+    studentDb.progress[account.id] ||= { current: 0, solved: [], codes: {}, updatedAt: null };
+  }
+}
+
+function pinMatches(account, pin) {
+  const expected = Buffer.from(account.pinHash, "hex");
+  const actual = scryptSync(pin, Buffer.from(account.pinSalt, "hex"), expected.length);
+  return expected.length === actual.length && timingSafeEqual(expected, actual);
+}
+
+function parseCookies(req) {
+  return Object.fromEntries((req.headers.cookie || "").split(";").map((part) => {
+    const separator = part.indexOf("=");
+    return separator < 0 ? ["", ""] : [part.slice(0, separator).trim(), decodeURIComponent(part.slice(separator + 1).trim())];
+  }).filter(([name]) => name));
+}
+
+function setSessionCookie(req, res, token, maxAge) {
+  const forwardedProto = String(req.headers["x-forwarded-proto"] || "").split(",")[0].trim();
+  const secure = forwardedProto === "https" || Boolean(req.socket.encrypted) ? "; Secure" : "";
+  res.setHeader("Set-Cookie", `judge_session=${token}; HttpOnly; SameSite=Lax; Path=/; Max-Age=${maxAge}${secure}`);
+}
+
+function getSession(req) {
+  const token = parseCookies(req).judge_session;
+  if (!token) return null;
+  const session = sessions.get(token);
+  if (!session || session.expiresAt <= Date.now()) {
+    sessions.delete(token);
+    return null;
+  }
+  return session;
+}
+
+function requireRole(req, res, role) {
+  const session = getSession(req);
+  if (!session) {
+    sendJson(res, 401, { message: "로그인이 필요해요." });
+    return null;
+  }
+  if (session.role !== role) {
+    sendJson(res, 403, { message: "이 기능을 사용할 권한이 없어요." });
+    return null;
+  }
+  return session;
+}
+
+function loginIsLimited(req) {
+  const ip = req.socket.remoteAddress || "unknown";
+  const now = Date.now();
+  let bucket = loginBuckets.get(ip);
+  if (!bucket || now - bucket.startedAt > 60_000) {
+    bucket = { startedAt: now, count: 0 };
+    loginBuckets.set(ip, bucket);
+  }
+  bucket.count += 1;
+  return bucket.count > 40;
 }
 
 function looksLikeCode(value) {
@@ -182,6 +314,165 @@ async function handleTutor(req, res) {
   }
 }
 
+async function readApiBody(req, res, maxBytes = 24_000) {
+  try { return await readRequestBody(req, maxBytes); }
+  catch (error) {
+    sendJson(res, error.message === "body_too_large" ? 413 : 400, { message: "요청 내용을 읽지 못했어요." });
+    return null;
+  }
+}
+
+async function handleAccountApi(req, res, pathname) {
+  if (pathname === "/api/auth/login" && req.method === "POST") {
+    if (loginIsLimited(req)) return sendJson(res, 429, { message: "로그인을 여러 번 시도했어요. 잠시 후 다시 해주세요." });
+    const body = await readApiBody(req, res, 4_000);
+    if (!body) return;
+    const { role, username, pin } = body;
+    if (!["student", "teacher"].includes(role)
+        || typeof username !== "string"
+        || typeof pin !== "string"
+        || !/^[a-z0-9_]{3,20}$/.test(username)
+        || !/^\d{6}$/.test(pin)) {
+      return sendJson(res, 400, { message: "아이디와 6자리 PIN을 확인해 주세요." });
+    }
+    const account = (role === "teacher" ? teacherDb.accounts : studentDb.accounts)
+      .find((entry) => entry.username === username);
+    if (!account || !pinMatches(account, pin)) {
+      return sendJson(res, 401, { message: "아이디 또는 PIN이 맞지 않아요." });
+    }
+    const token = randomBytes(32).toString("hex");
+    sessions.set(token, { id: account.id, username: account.username, role, expiresAt: Date.now() + 12 * 60 * 60 * 1000 });
+    setSessionCookie(req, res, token, 12 * 60 * 60);
+    return sendJson(res, 200, { id: account.id, username: account.username, role });
+  }
+
+  if (pathname === "/api/auth/me" && req.method === "GET") {
+    const session = getSession(req);
+    if (!session) return sendJson(res, 200, { authenticated: false });
+    return sendJson(res, 200, { id: session.id, username: session.username, role: session.role });
+  }
+
+  if (pathname === "/api/auth/logout" && req.method === "POST") {
+    const token = parseCookies(req).judge_session;
+    if (token) sessions.delete(token);
+    setSessionCookie(req, res, "", 0);
+    return sendJson(res, 200, { ok: true });
+  }
+
+  if (pathname === "/api/student/progress" && req.method === "GET") {
+    const session = requireRole(req, res, "student");
+    if (!session) return;
+    return sendJson(res, 200, studentDb.progress[session.id] || { current: 0, solved: [], codes: {}, updatedAt: null });
+  }
+
+  if (pathname === "/api/student/progress" && req.method === "PUT") {
+    const session = requireRole(req, res, "student");
+    if (!session) return;
+    const body = await readApiBody(req, res, 220_000);
+    if (!body) return;
+    if (!Number.isInteger(body.current) || body.current < 0 || body.current >= PROBLEMS.length
+        || !Array.isArray(body.solved) || body.solved.length > PROBLEMS.length
+        || body.solved.some((index) => !Number.isInteger(index) || index < 0 || index >= PROBLEMS.length)
+        || !body.codes || typeof body.codes !== "object" || Array.isArray(body.codes)
+        || JSON.stringify(body.codes).length > 200_000) {
+      return sendJson(res, 400, { message: "풀이 기록 형식이 올바르지 않아요." });
+    }
+    studentDb.progress[session.id] = {
+      current: body.current,
+      solved: [...new Set(body.solved)],
+      codes: body.codes,
+      updatedAt: new Date().toISOString()
+    };
+    await persistStudents();
+    return sendJson(res, 200, { ok: true });
+  }
+
+  if (pathname === "/api/teacher/students" && req.method === "GET") {
+    if (!requireRole(req, res, "teacher")) return;
+    const students = studentDb.accounts
+      .map((account) => {
+        const progress = studentDb.progress[account.id] || { solved: [], current: 0, updatedAt: null };
+        return {
+          id: account.id,
+          username: account.username,
+          solvedCount: progress.solved.length,
+          currentProblem: progress.current,
+          updatedAt: progress.updatedAt,
+          demo: Boolean(account.demo)
+        };
+      })
+      .sort((left, right) => left.username.localeCompare(right.username));
+    return sendJson(res, 200, { students });
+  }
+
+  if (pathname === "/api/teacher/account/pin" && req.method === "PUT") {
+    const session = requireRole(req, res, "teacher");
+    if (!session) return;
+    const body = await readApiBody(req, res, 4_000);
+    if (!body) return;
+    if (typeof body.currentPin !== "string" || typeof body.newPin !== "string" || !/^\d{6}$/.test(body.newPin)) {
+      return sendJson(res, 400, { message: "현재 PIN과 새 6자리 PIN을 확인해 주세요." });
+    }
+    const account = teacherDb.accounts.find((entry) => entry.id === session.id);
+    if (!account || !pinMatches(account, body.currentPin)) {
+      return sendJson(res, 401, { message: "현재 PIN이 맞지 않아요." });
+    }
+    const replacement = makeAccount(account.username, body.newPin, account.id, account.demo);
+    account.pinSalt = replacement.pinSalt;
+    account.pinHash = replacement.pinHash;
+    await persistTeachers();
+    const currentToken = parseCookies(req).judge_session;
+    for (const [token, activeSession] of sessions) {
+      if (activeSession.role === "teacher" && activeSession.id === account.id && token !== currentToken) sessions.delete(token);
+    }
+    return sendJson(res, 200, { ok: true });
+  }
+
+  if (pathname === "/api/teacher/students" && req.method === "POST") {
+    if (!requireRole(req, res, "teacher")) return;
+    const body = await readApiBody(req, res, 4_000);
+    if (!body) return;
+    const username = typeof body.username === "string" ? body.username.trim().toLowerCase() : "";
+    const pin = typeof body.pin === "string" ? body.pin : "";
+    if (!/^[a-z0-9_]{3,20}$/.test(username) || !/^\d{6}$/.test(pin)) {
+      return sendJson(res, 400, { message: "아이디는 영문·숫자·밑줄 3~20자, PIN은 6자리 숫자여야 해요." });
+    }
+    if (studentDb.accounts.some((account) => account.username === username)) {
+      return sendJson(res, 409, { message: "이미 사용 중인 학생 아이디예요." });
+    }
+    if (studentDb.accounts.length >= 500) return sendJson(res, 409, { message: "학생 계정은 최대 500개까지 만들 수 있어요." });
+    const account = makeAccount(username, pin);
+    studentDb.accounts.push(account);
+    studentDb.progress[account.id] = { current: 0, solved: [], codes: {}, updatedAt: null };
+    await persistStudents();
+    return sendJson(res, 201, { id: account.id, username: account.username });
+  }
+
+  const resetPinMatch = pathname.match(/^\/api\/teacher\/students\/([^/]+)\/pin$/);
+  if (resetPinMatch && req.method === "PUT") {
+    if (!requireRole(req, res, "teacher")) return;
+    const body = await readApiBody(req, res, 4_000);
+    if (!body) return;
+    if (typeof body.pin !== "string" || !/^\d{6}$/.test(body.pin)) {
+      return sendJson(res, 400, { message: "새 PIN은 6자리 숫자로 입력해 주세요." });
+    }
+    const account = studentDb.accounts.find((entry) => entry.id === resetPinMatch[1]);
+    if (!account) return sendJson(res, 404, { message: "학생 계정을 찾을 수 없어요." });
+    const replacement = makeAccount(account.username, body.pin, account.id, account.demo);
+    account.pinSalt = replacement.pinSalt;
+    account.pinHash = replacement.pinHash;
+    for (const [token, session] of sessions) {
+      if (session.role === "student" && session.id === account.id) sessions.delete(token);
+    }
+    await persistStudents();
+    return sendJson(res, 200, { ok: true, username: account.username });
+  }
+
+  return false;
+}
+
+await initializeDatabases();
+
 function mimeType(path) {
   return ({
     ".html": "text/html; charset=utf-8",
@@ -195,16 +486,21 @@ function mimeType(path) {
   })[extname(path)] || "application/octet-stream";
 }
 
-const vite = production ? null : await createViteServer({
-  configFile: resolve(root, "vite.config.js"),
-  server: { middlewareMode: true },
-  appType: "custom"
-});
-
+let vite = null;
 const server = createServer((req, res) => {
   const pathname = new URL(req.url || "/", "http://localhost").pathname;
-  if (pathname === "/api/tutor") {
-    void handleTutor(req, res);
+  if (pathname.startsWith("/api/")) {
+    void (async () => {
+      if (pathname === "/api/tutor") return handleTutor(req, res);
+      const handled = await handleAccountApi(req, res, pathname);
+      if (!handled && !res.writableEnded) sendJson(res, 404, { message: "요청한 기능을 찾을 수 없어요." });
+    })();
+    return;
+  }
+
+  if (pathname.startsWith("/data/")) {
+    res.writeHead(404);
+    res.end("Not found");
     return;
   }
 
@@ -257,6 +553,17 @@ const server = createServer((req, res) => {
     });
   });
 });
+
+if (!production) {
+  vite = await createViteServer({
+    server: {
+      middlewareMode: true,
+      hmr: { server },
+      fs: { deny: [".env", ".env.*", "*.{crt,pem}", "**/.git/**", "**/data/**"] }
+    },
+    appType: "custom"
+  });
+}
 
 const port = Number(process.env.PORT) || 3000;
 server.listen(port, "0.0.0.0", () => {

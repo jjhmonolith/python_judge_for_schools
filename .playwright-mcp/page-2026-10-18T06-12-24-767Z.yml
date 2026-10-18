@@ -1,0 +1,138 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - link "코드연습장 홈" [ref=e3] [cursor=pointer]:
+      - /url: "#"
+      - img [ref=e5]
+      - generic [ref=e7]: 코드연습장.
+    - generic [ref=e8]:
+      - generic [ref=e9]:
+        - img [ref=e10]
+        - generic [ref=e12]: "0"
+      - button "학생 또는 선생님 로그인" [ref=e13] [cursor=pointer]: 로그인
+  - main [ref=e14]:
+    - complementary "문제 목록" [ref=e15]:
+      - generic [ref=e16]:
+        - generic [ref=e17]:
+          - text: PYTHON · STARTER
+          - heading "오늘의 연습" [level=1] [ref=e18]
+        - generic [ref=e19]: 10 문제
+      - generic [ref=e21]:
+        - generic [ref=e22]: 트랙 진행률
+        - generic [ref=e23]: 0%
+      - generic [ref=e25]:
+        - 'button "문제 1: 두 수의 합" [ref=e26] [cursor=pointer]':
+          - generic [ref=e28]: "01"
+        - 'button "문제 2: 짝수일까 홀수일까 (잠김)" [disabled] [ref=e29] [cursor=pointer]':
+          - generic [ref=e31]: "02"
+        - 'button "문제 3: 세 수 중 가장 큰 수 (잠김)" [disabled] [ref=e32] [cursor=pointer]':
+          - generic [ref=e34]: "03"
+        - 'button "문제 4: 구구단 출력하기 (잠김)" [disabled] [ref=e35] [cursor=pointer]':
+          - generic [ref=e37]: "04"
+        - 'button "문제 5: 거꾸로 읽기 (잠김)" [disabled] [ref=e38] [cursor=pointer]':
+          - generic [ref=e40]: "05"
+        - 'button "문제 6: 점수의 평균 (잠김)" [disabled] [ref=e41] [cursor=pointer]':
+          - generic [ref=e43]: "06"
+        - 'button "문제 7: 별 계단 (잠김)" [disabled] [ref=e44] [cursor=pointer]':
+          - generic [ref=e46]: "07"
+        - 'button "문제 8: 모음 세기 (잠김)" [disabled] [ref=e47] [cursor=pointer]':
+          - generic [ref=e49]: "08"
+        - 'button "문제 9: 숫자 거꾸로 더하기 (잠김)" [disabled] [ref=e50] [cursor=pointer]':
+          - generic [ref=e52]: "09"
+        - 'button "문제 10: 가장 긴 단어 (잠김)" [disabled] [ref=e53] [cursor=pointer]':
+          - generic [ref=e55]: "10"
+    - region "문제 풀이" [ref=e56]:
+      - generic [ref=e57]:
+        - generic [ref=e58]:
+          - generic [ref=e59]: 기초 문법
+          - img [ref=e60]
+          - generic [ref=e62]: 문제 01
+        - button "도움말 보기" [ref=e63] [cursor=pointer]: "?"
+      - generic [ref=e64]:
+        - article [ref=e65]:
+          - generic [ref=e66]:
+            - generic [ref=e67]: "01"
+            - generic [ref=e68]: 입문
+            - generic [ref=e69]: ·
+            - generic [ref=e70]: 시간 제한 1초
+          - heading "두 수의 합" [level=2] [ref=e71]
+          - generic [ref=e72]:
+            - generic [ref=e73]: 입출력
+            - generic [ref=e74]: 산술 연산
+          - generic [ref=e75]: 정수 두 개가 주어집니다. 두 수를 더한 값을 출력하는 프로그램을 작성하세요.
+          - generic [ref=e76]:
+            - heading "↓ 입력" [level=3] [ref=e77]:
+              - generic [ref=e78]: ↓
+              - text: 입력
+            - paragraph [ref=e79]: 한 줄에 정수 A와 B가 공백으로 구분되어 주어집니다. (-1,000 ≤ A, B ≤ 1,000)
+          - generic [ref=e80]:
+            - heading "↑ 출력" [level=3] [ref=e81]:
+              - generic [ref=e82]: ↑
+              - text: 출력
+            - paragraph [ref=e83]: A와 B의 합을 출력합니다.
+          - generic [ref=e84]:
+            - generic [ref=e85]:
+              - generic [ref=e86]: 예제 입력
+              - generic [ref=e87]: 예제 출력
+            - generic [ref=e88]:
+              - generic [ref=e89]: 3 5
+              - generic [ref=e90]: "8"
+          - generic [ref=e91]:
+            - generic [ref=e92]: ✳
+            - generic [ref=e93]: 힌트
+            - generic [ref=e94]: input().split()으로 입력을 나누고, int()로 숫자로 바꿔 보세요.
+          - generic [ref=e95]:
+            - button "이전 문제" [disabled] [ref=e96]:
+              - generic [ref=e97]: ←
+              - text: 이전 문제
+            - generic [ref=e98]: 01 / 10
+            - button "다음 문제" [disabled] [ref=e99]:
+              - text: 다음 문제
+              - generic [ref=e100]: →
+        - region "파이썬 코드 편집기" [ref=e101]:
+          - generic [ref=e102]:
+            - generic [ref=e103]:
+              - generic [ref=e104]: Py
+              - generic [ref=e105]: solution.py
+            - generic [ref=e106]:
+              - generic [ref=e107]: ●
+              - text: Python 3
+          - generic [ref=e108]:
+            - generic [ref=e109]: 편집 중
+            - generic [ref=e111]:
+              - button "모범 답안 입력" [ref=e112] [cursor=pointer]:
+                - generic [ref=e113]: "{ }"
+                - text: 모범 답안 입력
+              - button "초기화" [ref=e114] [cursor=pointer]:
+                - img [ref=e115]
+                - text: 초기화
+          - generic [ref=e117]:
+            - generic [ref=e118]: 1 2 3 4
+            - textbox "파이썬 코드 입력" [ref=e119]: "a, b = map(int, input().split()) # 두 수의 합을 출력하세요"
+          - generic [ref=e120]:
+            - generic [ref=e121]: ⌘Enter 제출하기
+            - generic [ref=e122]: 4줄
+          - generic [ref=e123]:
+            - button "예제 실행" [ref=e124] [cursor=pointer]:
+              - img [ref=e125]
+              - text: 예제 실행
+            - button "정답 제출" [ref=e127] [cursor=pointer]:
+              - generic [ref=e128]: 정답 제출
+              - img [ref=e129]
+          - region "문제 풀이 도움" [ref=e131]:
+            - generic [ref=e132]:
+              - generic [ref=e133]: "?"
+              - generic [ref=e134]:
+                - strong [ref=e135]: 풀이 도우미
+                - generic [ref=e136]: OpenAI · 정답 코드 미제공
+            - generic [ref=e137]:
+              - button "힌트" [ref=e138] [cursor=pointer]
+              - button "오류 설명" [disabled] [ref=e139]
+              - button "오답 분석" [disabled] [ref=e140]
+            - paragraph [ref=e141]: 요청한 문제와 코드만 OpenAI로 전송돼요. 숨겨진 테스트와 정답은 보내지 않으며, 정답 코드는 알려주지 않아요.
+          - generic [ref=e142]:
+            - generic [ref=e143]: ⌑
+            - text: 코드는 브라우저 안에서 실행돼요
+      - generic [ref=e144]:
+        - generic [ref=e145]: 막히면 예제부터 실행해 보세요.
+        - generic [ref=e146]: 기록은 이 기기에 자동 저장됩니다 ✓
+  - status

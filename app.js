@@ -1,11 +1,7 @@
-import { createClient } from "@supabase/supabase-js";
 import { PROBLEMS } from "./problems.js";
 
 (() => {
   const problems = PROBLEMS;
-  const supabaseUrl = __SUPABASE_URL__.trim().replace(/\/rest\/v1\/?$/i, "").replace(/\/+$/, "");
-  const supabasePublishableKey = __SUPABASE_PUBLISHABLE_KEY__;
-  const supabase = supabaseUrl && supabasePublishableKey ? createClient(supabaseUrl, supabasePublishableKey) : null;
   const $ = (selector) => document.querySelector(selector);
   const list = $("#problem-list");
   const editor = $("#code-editor");
@@ -13,15 +9,14 @@ import { PROBLEMS } from "./problems.js";
   const submitButton = $("#submit-button");
   const sampleButton = $("#sample-button");
   const storageKey = "code-practice-judge-v1";
-  const sessionStorageKey = "code-practice-session-v1";
   let saved = loadProgress();
   let currentIndex = Math.min(Math.max(saved.current || 0, 0), problems.length - 1);
   let toastTimer;
   let activeWorker;
-  let currentStudent = null;
+  let currentAccount = null;
   let cloudSaveTimer;
   let isHydrating = false;
-  let accountMode = "login";
+  let accountRole = "student";
   let cloudErrorShown = false;
   let lastTutorRun = null;
   const tutorHintLevels = {};
@@ -34,14 +29,14 @@ import { PROBLEMS } from "./problems.js";
   }
 
   function progressStorageKey() {
-    return currentStudent ? `${storageKey}:${currentStudent.student_id}` : storageKey;
+    return currentAccount?.role === "student" ? `${storageKey}:${currentAccount.id}` : storageKey;
   }
 
   function persist() {
     saved.current = currentIndex;
     localStorage.setItem(progressStorageKey(), JSON.stringify(saved));
     updateProgress();
-    if (currentStudent && !isHydrating) scheduleCloudSave();
+    if (currentAccount?.role === "student" && !isHydrating) scheduleCloudSave();
   }
 
   function scheduleCloudSave() {
@@ -50,15 +45,16 @@ import { PROBLEMS } from "./problems.js";
   }
 
   async function saveCloudProgress() {
-    if (!supabase || !currentStudent) return;
+    if (currentAccount?.role !== "student") return;
     try {
-      const { data, error } = await supabase.rpc("student_save_progress", {
-        p_session_token: currentStudent.session_token,
-        p_current_problem: currentIndex,
-        p_solved: saved.solved || [],
-        p_codes: saved.codes || {}
+      await apiRequest("/api/student/progress", {
+        method: "PUT",
+        body: JSON.stringify({
+          current: currentIndex,
+          solved: saved.solved || [],
+          codes: saved.codes || {}
+        })
       });
-      if (error || data?.error) throw error || new Error(data.error);
       cloudErrorShown = false;
     } catch {
       if (!cloudErrorShown) showToast("온라인 저장에 실패했어요. 다시 로그인해 주세요.");
@@ -67,41 +63,23 @@ import { PROBLEMS } from "./problems.js";
   }
 
   async function activateStudent(profile) {
-    currentStudent = {
-      student_id: profile.student_id,
-      username: profile.username,
-      session_token: profile.session_token
-    };
-    localStorage.setItem(sessionStorageKey, JSON.stringify(currentStudent));
+    currentAccount = profile;
     updateAccountButton();
 
     let data;
-    let error;
     try {
-      ({ data, error } = await supabase.rpc("student_get_progress", {
-        p_session_token: currentStudent.session_token
-      }));
+      data = await apiRequest("/api/student/progress");
     } catch {
-      data = null;
-      error = new Error("network");
-    }
-    if (error || data?.error) {
-      const message = error?.message === "network"
-        ? "인터넷 연결을 확인하고 다시 로그인해 주세요."
-        : data?.error === "session_expired"
-          ? "로그인 시간이 끝났어요. 다시 로그인해 주세요."
-          : "계정 저장 설정을 확인해 주세요. 새 supabase-schema.sql을 실행해 주세요.";
-      currentStudent = null;
-      localStorage.removeItem(sessionStorageKey);
+      currentAccount = null;
       updateAccountButton();
-      setAccountNote(message);
+      setAccountNote("학생 학습 기록을 불러오지 못했어요. 다시 로그인해 주세요.");
       return false;
     }
 
     isHydrating = true;
     const localProgress = loadProgress(progressStorageKey());
     saved = {
-      current: data.current_problem ?? localProgress.current ?? 0,
+      current: data.current ?? localProgress.current ?? 0,
       solved: [...new Set([...(localProgress.solved || []), ...(data.solved || [])])],
       codes: { ...(localProgress.codes || {}), ...(data.codes || {}) }
     };
@@ -115,127 +93,121 @@ import { PROBLEMS } from "./problems.js";
 
   function updateAccountButton() {
     const button = $("#account-button");
-    button.textContent = currentStudent ? "로그아웃" : "로그인";
-    button.setAttribute("aria-label", currentStudent ? `${currentStudent.username} 로그아웃` : "아이디로 로그인");
-    $("#save-location").innerHTML = currentStudent
+    button.textContent = currentAccount?.role === "teacher" ? "선생님 관리" : currentAccount ? "로그아웃" : "로그인";
+    button.setAttribute("aria-label", currentAccount ? `${currentAccount.username} ${currentAccount.role === "teacher" ? "선생님 관리" : "로그아웃"}` : "학생 또는 선생님 로그인");
+    $("#save-location").innerHTML = currentAccount?.role === "student"
       ? '기록은 계정에 자동 저장됩니다 <span class="save-check">✓</span>'
       : '기록은 이 기기에 자동 저장됩니다 <span class="save-check">✓</span>';
   }
 
   async function startAuth() {
-    if (!supabase) {
-      setAccountNote("Supabase 연결 정보를 찾을 수 없어요. 관리자에게 알려주세요.");
-      return;
-    }
-    const session = loadStudentSession();
-    if (!session?.session_token) return;
     try {
-      await activateStudent(session);
-    } catch {
-      showToast("저장된 학습 계정에 연결하지 못했어요.");
-    }
+      const account = await apiRequest("/api/auth/me");
+      if (!account.authenticated) return;
+      if (account.role === "student") await activateStudent(account);
+      else {
+        currentAccount = account;
+        updateAccountButton();
+      }
+    } catch { /* No active session is the normal guest state. */ }
   }
 
-  function loadStudentSession() {
-    try { return JSON.parse(localStorage.getItem(sessionStorageKey)); }
-    catch { return null; }
+  async function apiRequest(path, options = {}) {
+    const response = await fetch(path, {
+      ...options,
+      headers: { "Content-Type": "application/json", ...(options.headers || {}) }
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.message || "요청을 처리하지 못했어요.");
+    return data;
   }
 
   function setAccountNote(message) {
     $("#account-note").textContent = message;
   }
 
-  function setAccountMode(mode) {
-    accountMode = mode;
-    const isSignup = mode === "signup";
-    const isReset = mode === "reset";
-    $("#account-title").textContent = isSignup ? "계정 만들기" : isReset ? "PIN 재설정" : "로그인";
-    $("#account-description").textContent = isSignup
-      ? "사용할 아이디와 6자리 PIN을 정해 주세요."
-      : isReset ? "아이디, 복구 코드, 새 PIN을 입력해 주세요." : "아이디와 6자리 PIN으로 학습 기록을 이어가세요.";
-    $("#pin-label").textContent = isReset ? "새 6자리 PIN" : "6자리 PIN";
-    $("#account-submit").textContent = isSignup ? "계정 만들기" : isReset ? "PIN 재설정" : "로그인";
-    $("#account-switch").textContent = isReset ? "로그인으로 돌아가기" : isSignup ? "이미 계정이 있나요? 로그인" : "처음 이용하나요? 계정 만들기";
-    $("#account-switch").hidden = false;
-    $("#forgot-pin-button").hidden = mode !== "login";
-    $("#recovery-field").hidden = !isReset;
-    $("#recovery-input").required = isReset;
-    $("#account-form").hidden = false;
-    $("#recovery-panel").hidden = true;
-    setAccountNote("아이디는 영문 소문자, 숫자, 밑줄 3~20자이며 PIN은 6자리 숫자예요.");
-  }
-
-  function showRecoveryCode(code) {
-    $("#account-form").hidden = true;
-    $("#account-switch").hidden = true;
-    $("#forgot-pin-button").hidden = true;
-    $("#recovery-panel").hidden = false;
-    $("#account-title").textContent = "복구 코드를 적어 두세요";
-    $("#account-description").textContent = "PIN을 잊었을 때 필요한 코드입니다. 이 화면을 닫으면 다시 볼 수 없어요.";
-    $("#recovery-code").textContent = code;
-  }
-
-  function accountErrorMessage(code) {
-    if (code === "username_taken") return "이미 사용 중인 아이디예요. 다른 아이디를 골라 주세요.";
-    if (code === "invalid_credentials") return "아이디나 PIN을 확인해 주세요. 여러 번 틀리면 잠시 기다려야 해요.";
-    if (code === "invalid_recovery") return "아이디와 복구 코드를 확인해 주세요.";
-    if (code === "invalid_input") return "아이디 형식과 6자리 숫자 PIN을 확인해 주세요.";
-    return "Supabase 설정을 확인해 주세요. 관리자에게 schema 파일 실행을 요청하세요.";
+  function setAccountRole(role) {
+    accountRole = role;
+    const isTeacher = role === "teacher";
+    $("#student-role-button").classList.toggle("active", !isTeacher);
+    $("#teacher-role-button").classList.toggle("active", isTeacher);
+    $("#student-role-button").setAttribute("aria-pressed", String(!isTeacher));
+    $("#teacher-role-button").setAttribute("aria-pressed", String(isTeacher));
+    $("#account-title").textContent = isTeacher ? "선생님 로그인" : "학생 로그인";
+    $("#account-description").textContent = isTeacher
+      ? "선생님 계정으로 학생들의 학습 현황을 확인하세요."
+      : "아이디와 6자리 PIN으로 학습 기록을 이어가세요.";
+    $("#account-submit").textContent = isTeacher ? "선생님으로 로그인" : "학생으로 로그인";
+    setAccountNote(isTeacher
+      ? "선생님 계정은 학생 계정과 별도로 관리됩니다."
+      : "학생 계정은 선생님이 만들어 드려요. PIN을 잊으면 선생님께 초기화를 요청하세요.");
   }
 
   async function submitAccountForm(event) {
     event.preventDefault();
-    if (!supabase) {
-      setAccountNote("Supabase 연결 정보를 찾을 수 없어요. 관리자에게 알려주세요.");
-      return;
-    }
-
-    const username = $("#account-username").value.trim().toLowerCase();
-    const pin = $("#account-pin").value.trim();
-    const payload = accountMode === "signup"
-      ? { functionName: "student_register", params: { p_username: username, p_pin: pin } }
-      : accountMode === "reset"
-        ? { functionName: "student_reset_pin", params: { p_username: username, p_recovery_code: $("#recovery-input").value.trim(), p_new_pin: pin } }
-        : { functionName: "student_login", params: { p_username: username, p_pin: pin } };
-
     $("#account-submit").disabled = true;
-    setAccountNote("확인하고 있어요...");
+    setAccountNote("로그인하고 있어요...");
     try {
-      const { data, error } = await supabase.rpc(payload.functionName, payload.params);
-      if (error) {
-        setAccountNote("Supabase 설정이 아직 끝나지 않았어요. 새 supabase-schema.sql을 실행했는지 확인해 주세요.");
-      } else if (data?.error) {
-        setAccountNote(accountErrorMessage(data.error));
-      } else if (await activateStudent(data)) {
-        $("#account-pin").value = "";
-        $("#recovery-input").value = "";
-        if (data.recovery_code) showRecoveryCode(data.recovery_code);
-        else {
-          $("#account-dialog").close();
-          showToast(accountMode === "reset" ? "PIN을 새로 설정했어요." : accountMode === "signup" ? "계정이 만들어졌어요." : "로그인했어요.");
-        }
+      const account = await apiRequest("/api/auth/login", {
+        method: "POST",
+        body: JSON.stringify({
+          role: accountRole,
+          username: $("#account-username").value.trim().toLowerCase(),
+          pin: $("#account-pin").value.trim()
+        })
+      });
+      if (account.role === "student") {
+        if (!await activateStudent(account)) return;
+        $("#account-dialog").close();
+        showToast("학생 계정으로 로그인했어요.");
+      } else {
+        currentAccount = account;
+        saved = { current: 0, solved: [], codes: {} };
+        currentIndex = 0;
+        renderProblem();
+        updateAccountButton();
+        $("#account-dialog").close();
+        await loadTeacherDashboard();
+        $("#teacher-dialog").showModal();
+        showToast("선생님 계정으로 로그인했어요.");
       }
-    } catch {
-      setAccountNote("연결에 실패했어요. 인터넷 연결을 확인하고 다시 시도해 주세요.");
+    } catch (error) {
+      setAccountNote(error.message);
     } finally {
       $("#account-submit").disabled = false;
     }
   }
 
-  async function logoutStudent() {
-    if (currentStudent && supabase) {
+  async function logoutAccount() {
+    if (currentAccount?.role === "student") {
       clearTimeout(cloudSaveTimer);
       await saveCloudProgress();
-      try { await supabase.rpc("student_logout", { p_session_token: currentStudent.session_token }); }
-      catch { /* The local session is still cleared when the connection is unavailable. */ }
     }
-    localStorage.removeItem(sessionStorageKey);
-    currentStudent = null;
+    try { await apiRequest("/api/auth/logout", { method: "POST", body: "{}" }); }
+    catch { /* Local state is cleared even if the server is unavailable. */ }
+    currentAccount = null;
     saved = loadProgress();
     currentIndex = Math.min(Math.max(saved.current || 0, 0), problems.length - 1);
+    if ($("#teacher-dialog").open) $("#teacher-dialog").close();
     renderProblem();
     updateAccountButton();
     showToast("로그아웃했어요.");
+  }
+
+  async function loadTeacherDashboard() {
+    try {
+      const { students } = await apiRequest("/api/teacher/students");
+      $("#teacher-count").textContent = `${students.length}명`;
+      $("#teacher-student-list").innerHTML = students.length
+        ? students.map((student) => {
+          const percent = Math.round(student.solvedCount / problems.length * 100);
+          const activity = student.updatedAt ? new Date(student.updatedAt).toLocaleString("ko-KR") : "아직 풀이 기록이 없어요";
+          return `<article class="teacher-student-card"><div class="teacher-student-top"><div><strong>${escapeHtml(student.username)}</strong><span>${student.solvedCount} / ${problems.length} 문제 완료</span></div><button type="button" data-reset-student="${escapeHtml(student.id)}" data-reset-username="${escapeHtml(student.username)}">PIN 초기화</button></div><div class="teacher-progress"><span style="width:${percent}%"></span></div><small>최근 학습: ${escapeHtml(activity)}</small></article>`;
+        }).join("")
+        : '<p class="teacher-empty">학생 계정이 없어요. 아래에서 추가해 주세요.</p>';
+    } catch (error) {
+      $("#teacher-student-list").innerHTML = `<p class="teacher-empty">${escapeHtml(error.message)}</p>`;
+    }
   }
 
   function updateProgress() {
@@ -584,31 +556,98 @@ import { PROBLEMS } from "./problems.js";
   $("#dialog-close").addEventListener("click", () => dialog.close());
   const accountDialog = $("#account-dialog");
   $("#account-button").addEventListener("click", async () => {
-    if (currentStudent) {
-      await logoutStudent();
+    if (currentAccount?.role === "teacher") {
+      await loadTeacherDashboard();
+      $("#teacher-dialog").showModal();
       return;
     }
-    setAccountMode("login");
+    if (currentAccount) {
+      await logoutAccount();
+      return;
+    }
+    setAccountRole("student");
     accountDialog.showModal();
   });
   $("#account-dialog-close").addEventListener("click", () => accountDialog.close());
   accountDialog.addEventListener("close", () => {
-    if (!$("#recovery-panel").hidden) $("#recovery-code").textContent = "";
     $("#account-pin").value = "";
-    $("#recovery-input").value = "";
-    setAccountMode("login");
+    setAccountRole("student");
   });
   $("#account-form").addEventListener("submit", submitAccountForm);
-  $("#account-switch").addEventListener("click", () => {
-    setAccountMode(accountMode === "reset" ? "login" : accountMode === "signup" ? "login" : "signup");
-  });
-  $("#forgot-pin-button").addEventListener("click", () => setAccountMode("reset"));
-  $("#copy-recovery-code").addEventListener("click", async () => {
+  $("#student-role-button").addEventListener("click", () => setAccountRole("student"));
+  $("#teacher-role-button").addEventListener("click", () => setAccountRole("teacher"));
+  $("#teacher-dialog-close").addEventListener("click", () => $("#teacher-dialog").close());
+  $("#teacher-logout").addEventListener("click", logoutAccount);
+  $("#teacher-add-form").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const button = event.currentTarget.querySelector("button[type=submit]");
+    button.disabled = true;
     try {
-      await navigator.clipboard.writeText($("#recovery-code").textContent);
-      showToast("복구 코드를 복사했어요.");
-    } catch {
-      showToast("복구 코드를 직접 적어 안전하게 보관해 주세요.");
+      const result = await apiRequest("/api/teacher/students", {
+        method: "POST",
+        body: JSON.stringify({
+          username: $("#new-student-username").value.trim().toLowerCase(),
+          pin: $("#new-student-pin").value.trim()
+        })
+      });
+      event.currentTarget.reset();
+      $("#teacher-note").textContent = `학생 ${result.username} 계정을 만들었어요.`;
+      await loadTeacherDashboard();
+    } catch (error) {
+      $("#teacher-note").textContent = error.message;
+    } finally {
+      button.disabled = false;
+    }
+  });
+  $("#teacher-student-list").addEventListener("click", (event) => {
+    const button = event.target.closest("[data-reset-student]");
+    if (!button) return;
+    $("#teacher-reset-form").dataset.studentId = button.dataset.resetStudent;
+    $("#reset-student-name").textContent = button.dataset.resetUsername;
+    $("#reset-student-pin").value = "";
+    $("#teacher-reset-form").hidden = false;
+    $("#reset-student-pin").focus();
+  });
+  $("#teacher-reset-form").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const studentId = form.dataset.studentId;
+    const button = form.querySelector("button[type=submit]");
+    button.disabled = true;
+    try {
+      const result = await apiRequest(`/api/teacher/students/${encodeURIComponent(studentId)}/pin`, {
+        method: "PUT",
+        body: JSON.stringify({ pin: $("#reset-student-pin").value.trim() })
+      });
+      form.hidden = true;
+      form.reset();
+      $("#teacher-note").textContent = `${result.username} 학생의 PIN을 초기화했어요.`;
+      await loadTeacherDashboard();
+    } catch (error) {
+      $("#teacher-note").textContent = error.message;
+    } finally {
+      button.disabled = false;
+    }
+  });
+  $("#teacher-pin-form").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const button = form.querySelector("button[type=submit]");
+    button.disabled = true;
+    try {
+      await apiRequest("/api/teacher/account/pin", {
+        method: "PUT",
+        body: JSON.stringify({
+          currentPin: $("#teacher-current-pin").value.trim(),
+          newPin: $("#teacher-new-pin").value.trim()
+        })
+      });
+      form.reset();
+      $("#teacher-note").textContent = "선생님 PIN을 변경했어요.";
+    } catch (error) {
+      $("#teacher-note").textContent = error.message;
+    } finally {
+      button.disabled = false;
     }
   });
 
