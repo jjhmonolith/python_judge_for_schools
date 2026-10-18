@@ -46,3 +46,105 @@
 [  311930ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
 [  312123ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
 [  312123ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 1887096ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[ 1887313ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 1887313ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 1916415ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[ 1916608ms] TypeError: Cannot read properties of undefined (reading 'difficulty')
+    at renderProblem (https://tqrkp0jyw78bavsd.jitda.io/app.js?t=1792305939339:249:44)
+    at https://tqrkp0jyw78bavsd.jitda.io/app.js?t=1792305939339:657:3
+    at https://tqrkp0jyw78bavsd.jitda.io/app.js?t=1792305939339:660:3
+[ 1916576ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 1916576ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 1930188ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[ 1930490ms] TypeError: Cannot read properties of undefined (reading 'difficulty')
+    at renderProblem (https://tqrkp0jyw78bavsd.jitda.io/app.js?t=1792305953166:251:44)
+    at https://tqrkp0jyw78bavsd.jitda.io/app.js?t=1792305953166:659:3
+    at https://tqrkp0jyw78bavsd.jitda.io/app.js?t=1792305953166:662:3
+[ 1930402ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 1930402ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 1981091ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[ 1981304ms] TypeError: Cannot read properties of undefined (reading 'difficulty')
+    at renderProblem (https://tqrkp0jyw78bavsd.jitda.io/app.js?t=1792306003981:273:44)
+    at https://tqrkp0jyw78bavsd.jitda.io/app.js?t=1792306003981:681:3
+    at https://tqrkp0jyw78bavsd.jitda.io/app.js?t=1792306003981:684:3
+[ 1981268ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 1981268ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 1997004ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[ 1997205ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 1997205ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 2004804ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[ 2005666ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 2005666ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 2045684ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[ 2045966ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 2045971ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 2060393ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[ 2060518ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 2060518ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 2075380ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[ 2075487ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 2075487ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 2084306ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[ 2084573ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 2084573ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 2175712ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[ 2175891ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 2175891ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 2212493ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[ 2212601ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 2212602ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 2220971ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[ 2221103ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 2221103ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 2307103ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[ 2307304ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 2307304ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 2327388ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[ 2327516ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 2327516ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 2338272ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[ 2338466ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 2338466ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 2360703ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[ 2360888ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 2360889ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 2372011ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[ 2372385ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 2372386ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 2379694ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[ 2379876ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 2379876ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 2402485ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[ 2402594ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 2402594ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 2402785ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://tqrkp0jyw78bavsd.jitda.io/api/problems:0
+[ 2417104ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[ 2417381ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 2417381ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 2417705ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://tqrkp0jyw78bavsd.jitda.io/api/problems:0
+[ 2429199ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[ 2429298ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 2429298ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 2429514ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://tqrkp0jyw78bavsd.jitda.io/api/problems:0
+[ 2484690ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[ 2484789ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 2484789ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 2485270ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://tqrkp0jyw78bavsd.jitda.io/api/problems:0
+[ 2618185ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[ 2618283ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 2618283ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 2618370ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://tqrkp0jyw78bavsd.jitda.io/api/problems:0
+[ 2626381ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[ 2626487ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 2626487ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 2626582ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://tqrkp0jyw78bavsd.jitda.io/api/problems:0
+[ 2643098ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[ 2643275ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 2643275ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 2643413ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://tqrkp0jyw78bavsd.jitda.io/api/problems:0
+[ 2660170ms] [LOG] [vite] server connection lost. Polling for restart... @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[ 2660180ms] [ERROR] WebSocket connection to 'wss://tqrkp0jyw78bavsd.jitda.io/' failed: Error during WebSocket handshake: Unexpected response code: 503 @ https://tqrkp0jyw78bavsd.jitda.io/@vite/client:1034
+[ 2662009ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[ 2662215ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[ 2662215ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0

@@ -1,7 +1,5 @@
-import { PROBLEMS } from "./problems.js";
-
-(() => {
-  const problems = PROBLEMS;
+(async () => {
+  let problems = [];
   const $ = (selector) => document.querySelector(selector);
   const list = $("#problem-list");
   const editor = $("#code-editor");
@@ -10,9 +8,10 @@ import { PROBLEMS } from "./problems.js";
   const sampleButton = $("#sample-button");
   const storageKey = "code-practice-judge-v1";
   let saved = loadProgress();
-  let currentIndex = Math.min(Math.max(saved.current || 0, 0), problems.length - 1);
+  let currentIndex = 0;
   let toastTimer;
   let activeWorker;
+  let judgeBusy = false;
   let currentAccount = null;
   let cloudSaveTimer;
   let isHydrating = false;
@@ -22,10 +21,142 @@ import { PROBLEMS } from "./problems.js";
   const tutorHintLevels = {};
   let tutorBusy = false;
   let tutorController = null;
+  let teacherProblems = [];
+  let editingProblemId = null;
 
   function loadProgress(key = storageKey) {
     try { return JSON.parse(localStorage.getItem(key)) || {}; }
     catch { return {}; }
+  }
+
+  function addProblemTestRow(test = {}) {
+    const row = document.createElement("div");
+    row.className = "problem-test-row";
+    const inputLabel = document.createElement("label");
+    inputLabel.textContent = "테스트 입력";
+    const input = document.createElement("textarea");
+    input.className = "teacher-textarea";
+    input.dataset.testInput = "true";
+    input.rows = 3;
+    input.value = test.input || "";
+    inputLabel.append(input);
+    const outputLabel = document.createElement("label");
+    outputLabel.textContent = "기대 출력";
+    const output = document.createElement("textarea");
+    output.className = "teacher-textarea";
+    output.dataset.testOutput = "true";
+    output.rows = 3;
+    output.value = test.output || "";
+    outputLabel.append(output);
+    const remove = document.createElement("button");
+    remove.className = "problem-test-remove";
+    remove.type = "button";
+    remove.textContent = "삭제";
+    remove.addEventListener("click", () => {
+      if (document.querySelectorAll(".problem-test-row").length > 1) row.remove();
+    });
+    row.append(inputLabel, outputLabel, remove);
+    $("#problem-test-list").append(row);
+  }
+
+  function clearTeacherProblemForm() {
+    editingProblemId = null;
+    $("#teacher-problem-form").reset();
+    $("#teacher-problem-form-title").textContent = "새 문제 추가";
+    $("#teacher-problem-submit").textContent = "문제 추가";
+    $("#teacher-problem-cancel").hidden = true;
+    $("#problem-published-input").checked = true;
+    $("#problem-test-list").innerHTML = "";
+    addProblemTestRow();
+  }
+
+  function editTeacherProblem(problemId) {
+    const problem = teacherProblems.find((entry) => entry.id === problemId);
+    if (!problem) return;
+    editingProblemId = problem.id;
+    $("#teacher-problem-form-title").textContent = `문제 수정: ${problem.title}`;
+    $("#teacher-problem-submit").textContent = "수정 저장";
+    $("#teacher-problem-cancel").hidden = false;
+    $("#problem-title-input").value = problem.title;
+    $("#problem-difficulty-input").value = problem.difficulty;
+    $("#problem-tags-input").value = (problem.tags || []).join(", ");
+    $("#problem-description-input").value = problem.description;
+    $("#problem-input-description").value = problem.input;
+    $("#problem-output-description").value = problem.output;
+    $("#problem-sample-input").value = problem.sampleInput;
+    $("#problem-sample-output").value = problem.sampleOutput;
+    $("#problem-hint-input").value = problem.hint;
+    $("#problem-starter-input").value = problem.starter;
+    $("#problem-answer-input").value = problem.answer;
+    $("#problem-published-input").checked = problem.published;
+    $("#problem-test-list").innerHTML = "";
+    problem.tests.forEach(addProblemTestRow);
+    $("#teacher-problem-form").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function renderTeacherProblems(items) {
+    teacherProblems = items;
+    $("#teacher-problem-count").textContent = `${items.length}개`;
+    $("#teacher-problem-list").innerHTML = items.length
+      ? sortedTeacherProblems(items).map((problem) => `<article class="teacher-problem-card"><div><strong>${escapeHtml(problem.title)}</strong><small>${problem.published ? "공개 중" : "비공개"} · 테스트 ${problem.tests.length}개 · ${escapeHtml(problem.difficulty)}</small></div><div class="teacher-problem-actions"><button type="button" data-edit-problem="${escapeHtml(problem.id)}">수정</button><button type="button" data-toggle-problem="${escapeHtml(problem.id)}">${problem.published ? "비공개" : "공개"}</button><button type="button" data-delete-problem="${escapeHtml(problem.id)}">삭제</button></div></article>`).join("")
+      : '<p class="teacher-empty">등록된 문제가 없어요. 아래에서 새 문제를 추가해 주세요.</p>';
+  }
+
+  function sortedTeacherProblems(items) {
+    return [...items].sort((left, right) => left.order - right.order);
+  }
+
+  async function refreshStudentProblems() {
+    const currentId = problems[currentIndex]?.id || saved.currentProblemId;
+    const data = await apiRequest("/api/problems");
+    problems = data.problems;
+    currentIndex = findProblemIndex(currentId);
+    if (!problems.some((problem) => problem.id === currentId)) {
+      currentIndex = findProblemIndex(saved.currentProblemId);
+    }
+    renderList();
+    renderProblem();
+    updateProgress();
+  }
+
+  function normalizeProgress(progress) {
+    const normalized = { ...progress };
+    if (!Array.isArray(normalized.solvedIds)) {
+      normalized.solvedIds = (normalized.solved || []).map((index) => problems[index]?.id).filter(Boolean);
+    }
+    if (!normalized.currentProblemId && Number.isInteger(normalized.current)) {
+      normalized.currentProblemId = problems[normalized.current]?.id || null;
+    }
+    normalized.codes = Object.fromEntries(Object.entries(normalized.codes || {}).map(([key, code]) => {
+      const id = /^\d+$/.test(key) ? problems[Number(key)]?.id : key;
+      return [id || key, code];
+    }));
+    delete normalized.current;
+    delete normalized.solved;
+    return normalized;
+  }
+
+  function findProblemIndex(problemId) {
+    const index = problems.findIndex((problem) => problem.id === problemId);
+    return index < 0 ? 0 : index;
+  }
+
+  async function loadProblemList() {
+    const data = await apiRequest("/api/problems");
+    problems = data.problems;
+    saved = normalizeProgress(saved);
+    currentIndex = findProblemIndex(saved.currentProblemId);
+    renderList();
+    renderProblem();
+  }
+
+  async function loadProblemList() {
+    const data = await apiRequest("/api/problems");
+    problems = data.problems;
+    saved = normalizeProgress(saved);
+    currentIndex = findProblemIndex(saved.currentProblemId);
+    renderList();
+    renderProblem();
   }
 
   function progressStorageKey() {
@@ -33,7 +164,7 @@ import { PROBLEMS } from "./problems.js";
   }
 
   function persist() {
-    saved.current = currentIndex;
+    saved.currentProblemId = problems[currentIndex]?.id || null;
     localStorage.setItem(progressStorageKey(), JSON.stringify(saved));
     updateProgress();
     if (currentAccount?.role === "student" && !isHydrating) scheduleCloudSave();
@@ -50,8 +181,8 @@ import { PROBLEMS } from "./problems.js";
       await apiRequest("/api/student/progress", {
         method: "PUT",
         body: JSON.stringify({
-          current: currentIndex,
-          solved: saved.solved || [],
+          currentProblemId: problems[currentIndex]?.id || null,
+          solvedIds: saved.solvedIds || [],
           codes: saved.codes || {}
         })
       });
@@ -77,13 +208,13 @@ import { PROBLEMS } from "./problems.js";
     }
 
     isHydrating = true;
-    const localProgress = loadProgress(progressStorageKey());
+    const localProgress = normalizeProgress(loadProgress(progressStorageKey()));
     saved = {
-      current: data.current ?? localProgress.current ?? 0,
-      solved: [...new Set([...(localProgress.solved || []), ...(data.solved || [])])],
+      currentProblemId: data.currentProblemId || localProgress.currentProblemId || null,
+      solvedIds: [...new Set([...(localProgress.solvedIds || []), ...(data.solvedIds || [])])],
       codes: { ...(localProgress.codes || {}), ...(data.codes || {}) }
     };
-    currentIndex = Math.min(Math.max(saved.current || 0, 0), problems.length - 1);
+    currentIndex = findProblemIndex(saved.currentProblemId);
     localStorage.setItem(progressStorageKey(), JSON.stringify(saved));
     renderProblem();
     isHydrating = false;
@@ -162,7 +293,7 @@ import { PROBLEMS } from "./problems.js";
         showToast("학생 계정으로 로그인했어요.");
       } else {
         currentAccount = account;
-        saved = { current: 0, solved: [], codes: {} };
+        saved = { currentProblemId: problems[0]?.id || null, solvedIds: [], codes: {} };
         currentIndex = 0;
         renderProblem();
         updateAccountButton();
@@ -179,6 +310,7 @@ import { PROBLEMS } from "./problems.js";
   }
 
   async function logoutAccount() {
+    const wasTeacher = currentAccount?.role === "teacher";
     if (currentAccount?.role === "student") {
       clearTimeout(cloudSaveTimer);
       await saveCloudProgress();
@@ -186,55 +318,113 @@ import { PROBLEMS } from "./problems.js";
     try { await apiRequest("/api/auth/logout", { method: "POST", body: "{}" }); }
     catch { /* Local state is cleared even if the server is unavailable. */ }
     currentAccount = null;
-    saved = loadProgress();
-    currentIndex = Math.min(Math.max(saved.current || 0, 0), problems.length - 1);
+    saved = normalizeProgress(loadProgress());
+    currentIndex = findProblemIndex(saved.currentProblemId);
     if ($("#teacher-dialog").open) $("#teacher-dialog").close();
+    if (wasTeacher) {
+      teacherProblems = [];
+      $("#teacher-problem-list").innerHTML = "";
+      clearTeacherProblemForm();
+    }
     renderProblem();
     updateAccountButton();
     showToast("로그아웃했어요.");
   }
 
   async function loadTeacherDashboard() {
+    let teacherProblems = [];
     try {
-      const { students } = await apiRequest("/api/teacher/students");
+      const [{ students }, problemData] = await Promise.all([
+        apiRequest("/api/teacher/students"),
+        apiRequest("/api/teacher/problems")
+      ]);
+      teacherProblems = problemData.problems;
       $("#teacher-count").textContent = `${students.length}명`;
       $("#teacher-student-list").innerHTML = students.length
         ? students.map((student) => {
-          const percent = Math.round(student.solvedCount / problems.length * 100);
+          const percent = Math.round(student.solvedCount / Math.max(1, student.totalProblems) * 100);
           const activity = student.updatedAt ? new Date(student.updatedAt).toLocaleString("ko-KR") : "아직 풀이 기록이 없어요";
-          return `<article class="teacher-student-card"><div class="teacher-student-top"><div><strong>${escapeHtml(student.username)}</strong><span>${student.solvedCount} / ${problems.length} 문제 완료</span></div><button type="button" data-reset-student="${escapeHtml(student.id)}" data-reset-username="${escapeHtml(student.username)}">PIN 초기화</button></div><div class="teacher-progress"><span style="width:${percent}%"></span></div><small>최근 학습: ${escapeHtml(activity)}</small></article>`;
+          return `<article class="teacher-student-card"><div class="teacher-student-top"><div><strong>${escapeHtml(student.username)}</strong><span>${student.solvedCount} / ${student.totalProblems} 공개 문제 완료</span></div><button type="button" data-reset-student="${escapeHtml(student.id)}" data-reset-username="${escapeHtml(student.username)}">PIN 초기화</button></div><div class="teacher-progress"><span style="width:${percent}%"></span></div><small>최근 학습: ${escapeHtml(activity)}</small></article>`;
         }).join("")
         : '<p class="teacher-empty">학생 계정이 없어요. 아래에서 추가해 주세요.</p>';
     } catch (error) {
       $("#teacher-student-list").innerHTML = `<p class="teacher-empty">${escapeHtml(error.message)}</p>`;
     }
+    renderTeacherProblems(teacherProblems);
+  }
+
+  async function saveTeacherProblem(event) {
+    event.preventDefault();
+    const submit = $("#teacher-problem-submit");
+    submit.disabled = true;
+    const problem = {
+      title: $("#problem-title-input").value.trim(),
+      difficulty: $("#problem-difficulty-input").value,
+      tags: $("#problem-tags-input").value.split(",").map((tag) => tag.trim()).filter(Boolean),
+      description: $("#problem-description-input").value,
+      input: $("#problem-input-description").value,
+      output: $("#problem-output-description").value,
+      sampleInput: $("#problem-sample-input").value,
+      sampleOutput: $("#problem-sample-output").value,
+      hint: $("#problem-hint-input").value,
+      starter: $("#problem-starter-input").value,
+      answer: $("#problem-answer-input").value,
+      tests: [...document.querySelectorAll(".problem-test-row")].map((row) => ({
+        input: row.querySelector("[data-test-input]").value,
+        output: row.querySelector("[data-test-output]").value
+      })),
+      published: $("#problem-published-input").checked
+    };
+    try {
+      const endpoint = editingProblemId
+        ? `/api/teacher/problems/${encodeURIComponent(editingProblemId)}`
+        : "/api/teacher/problems";
+      await apiRequest(endpoint, { method: editingProblemId ? "PUT" : "POST", body: JSON.stringify(problem) });
+      const wasEditing = Boolean(editingProblemId);
+      clearTeacherProblemForm();
+      $("#teacher-problem-note").textContent = wasEditing ? "문제를 수정했어요." : "문제를 추가했어요.";
+      await loadTeacherDashboard();
+      await refreshStudentProblems();
+    } catch (error) {
+      $("#teacher-problem-note").textContent = error.message;
+    } finally {
+      submit.disabled = false;
+    }
+  }
+
+  function setTeacherTab(tab) {
+    const showProblems = tab === "problems";
+    $("#teacher-students-panel").hidden = showProblems;
+    $("#teacher-problems-panel").hidden = !showProblems;
+    $("#teacher-tab-students").classList.toggle("active", !showProblems);
+    $("#teacher-tab-problems").classList.toggle("active", showProblems);
   }
 
   function updateProgress() {
-    const completed = saved.solved || [];
-    const count = completed.length;
-    let firstUnsolved = 0;
-    while (completed.includes(firstUnsolved)) firstUnsolved += 1;
+    const completed = saved.solvedIds || [];
+    const count = problems.filter((problem) => completed.includes(problem.id)).length;
+    const firstUnsolvedIndex = problems.findIndex((problem) => !completed.includes(problem.id));
+    const firstUnsolved = firstUnsolvedIndex < 0 ? problems.length : firstUnsolvedIndex;
     $("#solved-count").textContent = count;
-    $("#progress-label").textContent = `${Math.round(count / problems.length * 100)}%`;
-    $("#progress-bar").style.width = `${count / problems.length * 100}%`;
+    $("#progress-label").textContent = `${Math.round(count / Math.max(1, problems.length) * 100)}%`;
+    $("#progress-bar").style.width = `${count / Math.max(1, problems.length) * 100}%`;
     list.querySelectorAll(".problem-link").forEach((button, index) => {
-      button.classList.toggle("solved", completed.includes(index));
+      const problem = problems[index];
+      button.classList.toggle("solved", completed.includes(problem.id));
       button.classList.toggle("active", currentIndex === index);
       button.classList.toggle("locked", index > firstUnsolved);
       button.disabled = index > firstUnsolved;
-      button.setAttribute("aria-label", `문제 ${index + 1}: ${problems[index].title}${index > firstUnsolved ? " (잠김)" : ""}`);
+      button.setAttribute("aria-label", `문제 ${index + 1}: ${problem.title}${index > firstUnsolved ? " (잠김)" : ""}`);
       const number = button.querySelector(".problem-index");
       number.innerHTML = `<span>${String(index + 1).padStart(2, "0")}</span>`;
     });
   }
 
   function renderList() {
-    list.innerHTML = problems.map((problem, index) => `<button class="problem-link" type="button" data-index="${index}" aria-label="문제 ${index + 1}: ${problem.title}"><span class="problem-index"><span>${String(index + 1).padStart(2, "0")}</span></span><span class="problem-link-title">${problem.title}</span><span class="problem-link-diff">${problem.difficulty}</span></button>`).join("");
-    list.addEventListener("click", (event) => {
-      const button = event.target.closest(".problem-link");
-      if (button) selectProblem(Number(button.dataset.index));
-    });
+    list.innerHTML = problems.map((problem, index) => `<button class="problem-link" type="button" data-index="${index}" aria-label="문제 ${index + 1}: ${escapeHtml(problem.title)}"><span class="problem-index"><span>${String(index + 1).padStart(2, "0")}</span></span><span class="problem-link-title">${escapeHtml(problem.title)}</span><span class="problem-link-diff">${escapeHtml(problem.difficulty)}</span></button>`).join("");
+    $("#problem-count").textContent = `${problems.length} 문제`;
+    $("#total-problems").textContent = problems.length;
+    updateProgress();
   }
 
   function renderProblem() {
@@ -242,11 +432,28 @@ import { PROBLEMS } from "./problems.js";
     tutorController = null;
     tutorBusy = false;
     const problem = problems[currentIndex];
+    if (!problem) {
+      $("#problem-title").textContent = "현재 공개된 문제가 없습니다";
+      $("#problem-description").textContent = "선생님이 문제를 공개하면 여기에서 확인할 수 있어요.";
+      $("#problem-tags").innerHTML = "";
+      $("#problem-input").textContent = "";
+      $("#problem-output").textContent = "";
+      $("#sample-input").textContent = "";
+      $("#sample-output").textContent = "";
+      editor.value = "";
+      editor.disabled = true;
+      submitButton.disabled = true;
+      sampleButton.disabled = true;
+      return;
+    }
+    editor.disabled = false;
+    submitButton.disabled = false;
+    sampleButton.disabled = false;
     $("#breadcrumb-title").textContent = `문제 ${String(currentIndex + 1).padStart(2, "0")}`;
     $("#problem-number").textContent = String(currentIndex + 1).padStart(2, "0");
     $("#difficulty").textContent = problem.difficulty;
     $("#problem-title").textContent = problem.title;
-    $("#problem-tags").innerHTML = problem.tags.map((tag) => `<span>${tag}</span>`).join("");
+    $("#problem-tags").innerHTML = problem.tags.map((tag) => `<span>${escapeHtml(tag)}</span>`).join("");
     $("#problem-description").textContent = problem.description;
     $("#problem-input").textContent = problem.input;
     $("#problem-output").textContent = problem.output;
@@ -256,9 +463,10 @@ import { PROBLEMS } from "./problems.js";
     $("#problem-position").textContent = `${String(currentIndex + 1).padStart(2, "0")} / ${String(problems.length).padStart(2, "0")}`;
     $("#prev-button").disabled = currentIndex === 0;
     const next = $("#next-button");
-    next.disabled = currentIndex === problems.length - 1 || !(saved.solved || []).includes(currentIndex);
+    next.disabled = currentIndex === problems.length - 1 || !(saved.solvedIds || []).includes(problem.id);
     next.title = next.disabled && currentIndex < problems.length - 1 ? "현재 문제를 먼저 맞혀 보세요" : "다음 문제";
-    editor.value = (saved.codes || {})[currentIndex] ?? problem.starter;
+    saved.currentProblemId = problem.id;
+    editor.value = (saved.codes || {})[problem.id] ?? problem.starter;
     resultPanel.hidden = true;
     resultPanel.innerHTML = "";
     lastTutorRun = null;
@@ -269,7 +477,7 @@ import { PROBLEMS } from "./problems.js";
   }
 
   function selectProblem(index) {
-    if (index < 0 || index >= problems.length || index === currentIndex) return;
+    if (judgeBusy || index < 0 || index >= problems.length || index === currentIndex) return;
     currentIndex = index;
     persist();
     renderProblem();
@@ -330,40 +538,42 @@ import { PROBLEMS } from "./problems.js";
     return value.replace(/\r\n/g, "\n").trim();
   }
 
-  function renderResults(results, expected, isSample) {
+  function renderSampleResults(results, expected) {
     const allPassed = results.length > 0 && results.every((result, index) => !result.error && normalizeOutput(result.output) === normalizeOutput(expected[index]));
-    const passedCount = results.filter((result, index) => !result.error && normalizeOutput(result.output) === normalizeOutput(expected[index])).length;
     const codeError = results.find((result) => result.error);
-    lastTutorRun = codeError
-      ? { kind: "error", message: codeError.error }
-      : !allPassed && !isSample
-        ? { kind: "wrong", passed: passedCount, total: results.length }
-        : null;
+    lastTutorRun = codeError ? { kind: "error", message: codeError.error } : null;
     updateTutorButtons();
-    const title = allPassed ? (isSample ? "예제 통과" : "모든 테스트 통과") : results.some((result, index) => !result.error && normalizeOutput(result.output) === normalizeOutput(expected[index])) ? "일부 테스트 통과" : "다시 확인해 보세요";
     const rows = results.map((result, index) => {
       const passed = !result.error && normalizeOutput(result.output) === normalizeOutput(expected[index]);
-      let detail = "";
-      if (!passed) {
-        if (result.error) detail = `오류: ${result.error}`;
-        else detail = `내 출력: ${result.output || "(출력 없음)"}\n기대 출력: ${expected[index]}`;
-      }
-      return `<div class="case-row ${passed ? "pass" : "fail"}"><span class="case-name"><span>${passed ? "✓" : "×"}</span>${isSample ? "예제" : `테스트 ${String(index + 1).padStart(2, "0")}`}</span><span class="case-state">${passed ? "통과" : "실패"}</span>${detail ? `<div class="case-detail">${escapeHtml(detail)}</div>` : ""}</div>`;
+      const detail = !passed ? result.error ? `오류: ${result.error}` : `내 출력: ${result.output || "(출력 없음)"}\n기대 출력: ${expected[index]}` : "";
+      return `<div class="case-row ${passed ? "pass" : "fail"}"><span class="case-name"><span>${passed ? "✓" : "×"}</span>예제</span><span class="case-state">${passed ? "통과" : "실패"}</span>${detail ? `<div class="case-detail">${escapeHtml(detail)}</div>` : ""}</div>`;
     }).join("");
-    resultPanel.innerHTML = `<div class="result-summary ${allPassed ? "all-pass" : "has-error"}"><strong>${title}</strong><span>${results.filter((result, index) => !result.error && normalizeOutput(result.output) === normalizeOutput(expected[index])).length} / ${results.length} 통과</span></div><div class="case-list">${rows}</div>`;
+    resultPanel.innerHTML = `<div class="result-summary ${allPassed ? "all-pass" : "has-error"}"><strong>${allPassed ? "예제 통과" : "예제를 다시 확인해 보세요"}</strong><span>${results.filter((result, index) => !result.error && normalizeOutput(result.output) === normalizeOutput(expected[index])).length} / ${results.length} 통과</span></div><div class="case-list">${rows}</div>`;
     resultPanel.hidden = false;
-    if (allPassed && !isSample) {
-      const solved = saved.solved || [];
-      if (!solved.includes(currentIndex)) saved.solved = [...solved, currentIndex].sort((a, b) => a - b);
+  }
+
+  function renderJudgeResult(result) {
+    const allPassed = result.accepted;
+    lastTutorRun = result.kind === "error"
+      ? { kind: "error", message: result.error || "실행 중 오류가 발생했어요." }
+      : !allPassed ? { kind: "wrong", passed: result.passed, total: result.total } : null;
+    updateTutorButtons();
+    const title = allPassed ? "모든 테스트 통과" : result.kind === "error" ? "코드 실행 중 오류" : "다시 확인해 보세요";
+    const rows = result.cases.map((test, index) => `<div class="case-row ${test.passed ? "pass" : "fail"}"><span class="case-name"><span>${test.passed ? "✓" : "×"}</span>테스트 ${String(index + 1).padStart(2, "0")}</span><span class="case-state">${escapeHtml(test.label)}</span></div>`).join("");
+    resultPanel.innerHTML = `<div class="result-summary ${allPassed ? "all-pass" : "has-error"}"><strong>${title}</strong><span>${result.passed} / ${result.total} 통과</span></div><div class="case-list">${rows}</div>`;
+    resultPanel.hidden = false;
+    if (allPassed) {
+      const problemId = problems[currentIndex].id;
+      saved.solvedIds ||= [];
+      if (!saved.solvedIds.includes(problemId)) saved.solvedIds.push(problemId);
       persist();
-      $("#next-button").disabled = currentIndex >= problems.length - 1;
       if (currentIndex < problems.length - 1) showToast("정답이에요! 다음 문제가 열렸어요.");
-      else showToast("축하해요! 10문제를 모두 풀었어요.");
+      else showToast("축하해요! 모든 공개 문제를 풀었어요.");
     }
   }
 
   function updateTutorButtons() {
-    $("#tutor-hint").disabled = tutorBusy || (tutorHintLevels[currentIndex] || 0) >= 3;
+    $("#tutor-hint").disabled = tutorBusy || (tutorHintLevels[problems[currentIndex]?.id] || 0) >= 3;
     $("#tutor-error").disabled = tutorBusy || lastTutorRun?.kind !== "error";
     $("#tutor-wrong").disabled = tutorBusy || lastTutorRun?.kind !== "wrong";
   }
@@ -377,8 +587,9 @@ import { PROBLEMS } from "./problems.js";
   async function requestTutor(kind) {
     if (tutorBusy) return;
     const requestIndex = currentIndex;
+    const problemId = problems[requestIndex].id;
     const requestCode = editor.value;
-    const hintLevel = Math.min((tutorHintLevels[requestIndex] || 0) + 1, 3);
+    const hintLevel = Math.min((tutorHintLevels[problemId] || 0) + 1, 3);
     const controller = new AbortController();
     tutorController = controller;
     tutorBusy = true;
@@ -392,7 +603,7 @@ import { PROBLEMS } from "./problems.js";
         signal: controller.signal,
         body: JSON.stringify({
           kind,
-          problemIndex: requestIndex,
+          problemId,
           code: requestCode,
           hintLevel: kind === "hint" ? hintLevel : undefined,
           error: kind === "error" ? lastTutorRun?.message : undefined,
@@ -406,7 +617,7 @@ import { PROBLEMS } from "./problems.js";
         showTutorResponse("코드가 바뀌었어요", "현재 작성한 코드 기준으로 다시 도움을 요청해 주세요.");
         return;
       }
-      if (kind === "hint") tutorHintLevels[requestIndex] = hintLevel;
+      if (kind === "hint") tutorHintLevels[problemId] = hintLevel;
       showTutorResponse(reply.title, `${reply.message}\n\n생각해 볼 질문: ${reply.question}`);
     } catch (error) {
       if (!controller.signal.aborted) {
@@ -431,6 +642,15 @@ import { PROBLEMS } from "./problems.js";
       editor.focus();
       return;
     }
+    if (!isSample && currentAccount?.role !== "student") {
+      if (currentAccount?.role === "teacher") showToast("학생 계정으로 로그인해야 제출할 수 있어요.");
+      else {
+        showToast("정답 제출은 학생 로그인 후 사용할 수 있어요.");
+        setAccountRole("student");
+        $("#account-dialog").showModal();
+      }
+      return;
+    }
     if (activeWorker) activeWorker.terminate();
     tutorController?.abort();
     tutorController = null;
@@ -440,11 +660,30 @@ import { PROBLEMS } from "./problems.js";
     updateTutorButtons();
     submitButton.disabled = true;
     sampleButton.disabled = true;
-    $(".submit-label").textContent = "실행 중...";
+    $(".submit-label").textContent = isSample ? "실행 중..." : "숨김 테스트로 채점 중...";
     resultPanel.hidden = false;
-    resultPanel.innerHTML = `<div class="result-summary"><strong>파이썬 실행 환경을 준비하고 있어요</strong><span>잠시만 기다려 주세요</span></div>`;
+    resultPanel.innerHTML = `<div class="result-summary"><strong>${isSample ? "예제를 실행하고 있어요" : "비공개 테스트케이스로 채점하고 있어요"}</strong><span>잠시만 기다려 주세요</span></div>`;
     const problem = problems[currentIndex];
-    const selectedTests = isSample ? [[problem.sampleInput, problem.sampleOutput]] : problem.tests;
+    if (!isSample) {
+      judgeBusy = true;
+      try {
+        const result = await apiRequest("/api/judge", {
+          method: "POST",
+          body: JSON.stringify({ problemId: problem.id, code: editor.value })
+        });
+        renderJudgeResult(result);
+      } catch (error) {
+        lastTutorRun = null;
+        updateTutorButtons();
+        resultPanel.innerHTML = `<div class="result-summary has-error"><strong>채점할 수 없어요</strong></div><div class="case-row fail"><span class="case-name">${escapeHtml(error.message)}</span></div>`;
+      } finally {
+        judgeBusy = false;
+        resetRunButtons();
+      }
+      return;
+    }
+
+    const selectedTests = [[problem.sampleInput, problem.sampleOutput]];
     try {
       const worker = pythonWorker();
       activeWorker = worker;
@@ -467,7 +706,7 @@ import { PROBLEMS } from "./problems.js";
           resultPanel.innerHTML = `<div class="result-summary has-error"><strong>코드를 실행하지 못했어요</strong></div><div class="case-row fail"><div class="case-detail">${escapeHtml(message)}</div></div>`;
           return;
         }
-        renderResults(event.data.results, selectedTests.map((test) => test[1]), isSample);
+        renderSampleResults(event.data.results, selectedTests.map((test) => test[1]));
       };
       worker.onerror = (event) => {
         clearTimeout(timeout);
@@ -500,7 +739,7 @@ import { PROBLEMS } from "./problems.js";
     $("#tutor-response").hidden = true;
     updateTutorButtons();
     saved.codes ||= {};
-    saved.codes[currentIndex] = editor.value;
+    saved.codes[problems[currentIndex].id] = editor.value;
     persist();
     $("#unsaved-dot").hidden = false;
   });
@@ -519,19 +758,11 @@ import { PROBLEMS } from "./problems.js";
   $("#reset-button").addEventListener("click", () => {
     editor.value = problems[currentIndex].starter;
     saved.codes ||= {};
-    saved.codes[currentIndex] = editor.value;
+    saved.codes[problems[currentIndex].id] = editor.value;
     persist();
     updateLineNumbers();
     $("#unsaved-dot").hidden = true;
     showToast("코드를 처음 상태로 되돌렸어요.");
-  });
-  $("#answer-button").addEventListener("click", () => {
-    editor.value = problems[currentIndex].answer;
-    editor.dispatchEvent(new Event("input", { bubbles: true }));
-    resultPanel.hidden = true;
-    resultPanel.innerHTML = "";
-    editor.focus();
-    showToast("모범 답안을 편집기에 입력했어요.");
   });
   $("#tutor-hint").addEventListener("click", () => requestTutor("hint"));
   $("#tutor-error").addEventListener("click", () => requestTutor("error"));
@@ -650,9 +881,56 @@ import { PROBLEMS } from "./problems.js";
       button.disabled = false;
     }
   });
+  $("#teacher-tab-students").addEventListener("click", () => setTeacherTab("students"));
+  $("#teacher-tab-problems").addEventListener("click", () => setTeacherTab("problems"));
+  $("#teacher-problem-form").addEventListener("submit", saveTeacherProblem);
+  $("#teacher-problem-cancel").addEventListener("click", clearTeacherProblemForm);
+  $("#add-problem-test").addEventListener("click", () => addProblemTestRow());
+  $("#teacher-problem-list").addEventListener("click", async (event) => {
+    const editButton = event.target.closest("[data-edit-problem]");
+    const toggleButton = event.target.closest("[data-toggle-problem]");
+    const deleteButton = event.target.closest("[data-delete-problem]");
+    try {
+      if (editButton) {
+        editTeacherProblem(editButton.dataset.editProblem);
+        return;
+      }
+      if (toggleButton) {
+        const problem = teacherProblems.find((entry) => entry.id === toggleButton.dataset.toggleProblem);
+        if (!problem) return;
+        await apiRequest(`/api/teacher/problems/${encodeURIComponent(problem.id)}/visibility`, {
+          method: "PUT",
+          body: JSON.stringify({ published: !problem.published })
+        });
+        $("#teacher-problem-note").textContent = problem.published ? "문제를 비공개로 바꿨어요." : "문제를 공개했어요.";
+      } else if (deleteButton) {
+        const problem = teacherProblems.find((entry) => entry.id === deleteButton.dataset.deleteProblem);
+        if (!problem || !window.confirm(`'${problem.title}' 문제를 삭제할까요?`)) return;
+        await apiRequest(`/api/teacher/problems/${encodeURIComponent(problem.id)}`, { method: "DELETE" });
+        if (editingProblemId === problem.id) clearTeacherProblemForm();
+        $("#teacher-problem-note").textContent = "문제를 삭제했어요.";
+      } else {
+        return;
+      }
+      await loadTeacherDashboard();
+      await refreshStudentProblems();
+    } catch (error) {
+      $("#teacher-problem-note").textContent = error.message;
+    }
+  });
 
-  renderList();
-  renderProblem();
+  list.addEventListener("click", (event) => {
+    const button = event.target.closest(".problem-link");
+    if (button) selectProblem(Number(button.dataset.index));
+  });
+  clearTeacherProblemForm();
+  setTeacherTab("students");
+  try {
+    await loadProblemList();
+  } catch {
+    $("#problem-title").textContent = "문제를 불러오지 못했어요";
+    $("#problem-description").textContent = "서버 연결을 확인한 뒤 새로고침해 주세요.";
+  }
   updateAccountButton();
-  startAuth();
+  await startAuth();
 })();

@@ -170,3 +170,220 @@
 .teacher-logout:hover {
   background: #f4f2ed;
 }
+
+.teacher-tabs {
+  display: flex;
+  gap: 7px;
+  margin: 14px 0;
+  border-bottom: 1px solid #e7e5de;
+}
+
+.teacher-tabs button {
+  min-height: 38px;
+  padding: 0 11px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: #85877e;
+  font-size: 11px;
+}
+
+.teacher-tabs button.active {
+  border-bottom-color: #64856a;
+  color: #3f6d55;
+  font-weight: 700;
+}
+
+.teacher-dialog [hidden] {
+  display: none !important;
+}
+
+.teacher-problem-list {
+  display: grid;
+  gap: 7px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.teacher-problem-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
+  border: 1px solid #e6e5dd;
+  border-radius: 5px;
+  background: #fffefa;
+}
+
+.teacher-problem-card strong {
+  display: block;
+  color: #41473f;
+  font-size: 11px;
+}
+
+.teacher-problem-card small {
+  display: block;
+  margin-top: 3px;
+  color: #85877e;
+  font-size: 9px;
+}
+
+.teacher-problem-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 5px;
+}
+
+.teacher-problem-actions button,
+.teacher-test-heading button,
+.teacher-problem-actions #teacher-problem-cancel {
+  min-height: 31px;
+  padding: 0 8px;
+  border: 1px solid #e2dfd7;
+  border-radius: 4px;
+  background: #fffefa;
+  color: #657260;
+  font-size: 9px;
+}
+
+.teacher-problem-actions button:hover,
+.teacher-test-heading button:hover {
+  background: #eef3eb;
+}
+
+.teacher-problem-form {
+  max-height: 390px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.teacher-problem-form h3,
+.teacher-test-heading h3 {
+  margin: 0;
+  color: #494e46;
+  font-size: 12px;
+}
+
+.teacher-textarea {
+  width: 100%;
+  min-height: 58px;
+  padding: 9px 10px;
+  border: 1px solid #deddd6;
+  border-radius: 5px;
+  background: #fff;
+  color: #353a33;
+  font: 11px/1.55 "Noto Sans KR", sans-serif;
+  resize: vertical;
+}
+
+.teacher-textarea:focus {
+  outline: 2px solid #91af92;
+  border-color: #91af92;
+}
+
+.code-textarea {
+  font: 11px/1.6 var(--mono);
+  tab-size: 4;
+}
+
+.teacher-sample-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+}
+
+.teacher-sample-fields > div {
+  display: grid;
+  gap: 7px;
+}
+
+.teacher-test-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 7px;
+}
+
+.problem-test-list {
+  display: grid;
+  gap: 8px;
+}
+
+.problem-test-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  align-items: end;
+  gap: 7px;
+  padding: 9px;
+  border: 1px solid #e7e5de;
+  border-radius: 5px;
+  background: #f8f7f2;
+}
+
+.problem-test-row label {
+  display: grid;
+  gap: 5px;
+  color: #74776f;
+  font-size: 9px;
+}
+
+.problem-test-row .teacher-textarea {
+  background: #fffefa;
+}
+
+.problem-test-remove {
+  min-height: 32px;
+  padding: 0 8px;
+  border: 1px solid #ead9d0;
+  border-radius: 4px;
+  background: #fffefa;
+  color: #a45e4b;
+  font-size: 9px;
+}
+
+.publish-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #536154;
+  font-size: 11px;
+}
+
+.publish-toggle input {
+  width: 16px;
+  height: 16px;
+  accent-color: #4e7958;
+}
+
+.teacher-problem-actions {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.teacher-problem-actions .account-submit {
+  width: auto;
+  min-width: 130px;
+  padding: 0 14px;
+}
+
+.teacher-problem-actions [hidden] {
+  display: none !important;
+}
+
+@media (max-width: 540px) {
+  .teacher-sample-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .problem-test-row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .problem-test-remove {
+    grid-column: 1 / -1;
+    justify-self: end;
+  }
+}

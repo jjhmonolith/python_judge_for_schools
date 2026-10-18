@@ -23,14 +23,14 @@
     </a>
     <div class="topbar-center"><span class="live-dot"></span> 파이썬 기초 트랙 <span class="topbar-divider">/</span> 혼자 풀기</div>
     <div class="topbar-right">
-      <div class="streak"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2c1 4-3 5-2 8 1-1 2-2 2-3 3 2 5 5 3 8a4 4 0 0 1-7-1c-1-4 2-6 4-12Z"/></svg><span id="solved-count">0</span><span class="streak-label">/ 10 완료</span></div>
+      <div class="streak"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2c1 4-3 5-2 8 1-1 2-2 2-3 3 2 5 5 3 8a4 4 0 0 1-7-1c-1-4 2-6 4-12Z"/></svg><span id="solved-count">0</span><span class="streak-label">/ <span id="total-problems">10</span> 완료</span></div>
       <button class="account-button" id="account-button" type="button">로그인</button>
     </div>
   </header>
 
   <main class="layout">
     <aside class="sidebar" aria-label="문제 목록">
-      <div class="sidebar-heading"><div><span class="eyebrow">PYTHON · STARTER</span><h1>오늘의 연습</h1></div><span class="total-pill">10 문제</span></div>
+      <div class="sidebar-heading"><div><span class="eyebrow">PYTHON · STARTER</span><h1>오늘의 연습</h1></div><span class="total-pill" id="problem-count">10 문제</span></div>
       <div class="track-progress"><div class="progress-copy"><span>트랙 진행률</span><span id="progress-label">0%</span></div><div class="progress-rail"><span id="progress-bar"></span></div></div>
       <div class="problem-list" id="problem-list"></div>
       <div class="sidebar-note"><span class="note-icon" aria-hidden="true">i</span><p>정답을 제출하면 다음 문제가 열려요. 풀었던 문제는 언제든 다시 볼 수 있어요.</p></div>
@@ -54,7 +54,7 @@
 
         <section class="editor-panel" aria-label="파이썬 코드 편집기">
           <div class="editor-head"><div class="editor-title"><span class="file-icon">Py</span><span>solution.py</span><span class="unsaved-dot" id="unsaved-dot" hidden></span></div><div class="language-label"><span class="python-mark">●</span> Python 3</div></div>
-          <div class="editor-toolbar"><span class="editor-mode"><span class="mode-dot"></span> 편집 중</span><div class="editor-actions"><button class="answer-button" id="answer-button" type="button" title="현재 문제의 모범답안을 편집기에 입력합니다."><span aria-hidden="true">{ }</span> 모범 답안 입력</button><button class="reset-button" id="reset-button" type="button"><svg viewBox="0 0 18 18" aria-hidden="true"><path d="M3 8a6 6 0 1 1 1 4M3 3v5h5"/></svg> 초기화</button></div></div>
+          <div class="editor-toolbar"><span class="editor-mode"><span class="mode-dot"></span> 편집 중</span><div class="editor-actions"><button class="reset-button" id="reset-button" type="button"><svg viewBox="0 0 18 18" aria-hidden="true"><path d="M3 8a6 6 0 1 1 1 4M3 3v5h5"/></svg> 초기화</button></div></div>
           <div class="code-area"><div class="line-numbers" id="line-numbers" aria-hidden="true">1</div><textarea id="code-editor" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" aria-label="파이썬 코드 입력" wrap="off"></textarea></div>
           <div class="editor-foot"><span><kbd>⌘</kbd><kbd>Enter</kbd> 제출하기</span><span id="line-count">1줄</span></div>
           <div class="submit-area"><button class="run-sample-button" id="sample-button" type="button"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 4.5 15 10l-8 5.5z"/></svg> 예제 실행</button><button class="submit-button" id="submit-button" type="button"><span class="submit-label">정답 제출</span><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M10 5l5 5-5 5"/></svg></button></div>
@@ -72,7 +72,7 @@
             </div>
             <p class="tutor-caption">요청한 문제와 코드만 OpenAI로 전송돼요. 숨겨진 테스트와 정답은 보내지 않으며, 정답 코드는 알려주지 않아요.</p>
           </section>
-          <div class="editor-caption"><span class="lock-icon" aria-hidden="true">⌑</span> 코드는 브라우저 안에서 실행돼요</div>
+          <div class="editor-caption"><span class="lock-icon" aria-hidden="true">⌑</span> 제출 코드는 Judge0 안전 실행기로 전송돼요. 테스트 입력과 정답은 학생 화면에 보내지 않아요.</div>
         </section>
       </div>
       <footer class="workspace-footer"><span>막히면 예제부터 실행해 보세요.</span><span id="save-location">기록은 이 기기에 자동 저장됩니다 <span class="save-check">✓</span></span></footer>
@@ -101,22 +101,56 @@
   <dialog class="help-dialog teacher-dialog" id="teacher-dialog">
     <button class="dialog-close" id="teacher-dialog-close" aria-label="닫기" type="button">×</button>
     <span class="eyebrow">선생님 전용</span>
-    <div class="teacher-title-row"><div><h2>학생 학습 현황</h2><p>학생 계정과 문제 풀이 진행을 관리합니다.</p></div><span class="teacher-count" id="teacher-count">0명</span></div>
-    <div class="teacher-student-list" id="teacher-student-list"></div>
-    <form class="teacher-form" id="teacher-add-form">
-      <h3>학생 계정 추가</h3>
-      <label class="account-label" for="new-student-username">학생 아이디</label>
-      <input class="account-input" id="new-student-username" type="text" pattern="[A-Za-z0-9_]{3,20}" minlength="3" maxlength="20" autocomplete="off" required>
-      <label class="account-label" for="new-student-pin">임시 6자리 PIN</label>
-      <input class="account-input" id="new-student-pin" type="password" inputmode="numeric" pattern="[0-9]{6}" minlength="6" maxlength="6" autocomplete="new-password" required>
-      <button class="account-submit" type="submit">학생 추가</button>
-    </form>
-    <form class="teacher-form teacher-reset-form" id="teacher-reset-form" hidden>
-      <h3><span id="reset-student-name"></span> PIN 초기화</h3>
-      <label class="account-label" for="reset-student-pin">새 6자리 PIN</label>
-      <input class="account-input" id="reset-student-pin" type="password" inputmode="numeric" pattern="[0-9]{6}" minlength="6" maxlength="6" autocomplete="new-password" required>
-      <button class="account-submit" type="submit">PIN 저장</button>
-    </form>
+    <div class="teacher-tabs"><button id="teacher-tab-students" class="active" type="button">학생 관리</button><button id="teacher-tab-problems" type="button">문제 관리</button></div>
+    <section id="teacher-students-panel">
+      <div class="teacher-title-row"><div><h2>학생 학습 현황</h2><p>학생 계정과 문제 풀이 진행을 관리합니다.</p></div><span class="teacher-count" id="teacher-count">0명</span></div>
+      <div class="teacher-student-list" id="teacher-student-list"></div>
+      <form class="teacher-form" id="teacher-add-form">
+        <h3>학생 계정 추가</h3>
+        <label class="account-label" for="new-student-username">학생 아이디</label>
+        <input class="account-input" id="new-student-username" type="text" pattern="[A-Za-z0-9_]{3,20}" minlength="3" maxlength="20" autocomplete="off" required>
+        <label class="account-label" for="new-student-pin">임시 6자리 PIN</label>
+        <input class="account-input" id="new-student-pin" type="password" inputmode="numeric" pattern="[0-9]{6}" minlength="6" maxlength="6" autocomplete="new-password" required>
+        <button class="account-submit" type="submit">학생 추가</button>
+      </form>
+      <form class="teacher-form teacher-reset-form" id="teacher-reset-form" hidden>
+        <h3><span id="reset-student-name"></span> PIN 초기화</h3>
+        <label class="account-label" for="reset-student-pin">새 6자리 PIN</label>
+        <input class="account-input" id="reset-student-pin" type="password" inputmode="numeric" pattern="[0-9]{6}" minlength="6" maxlength="6" autocomplete="new-password" required>
+        <button class="account-submit" type="submit">PIN 저장</button>
+      </form>
+    </section>
+    <section id="teacher-problems-panel" hidden>
+      <div class="teacher-title-row"><div><h2>파이썬 문제</h2><p>문제 내용, 코드, 테스트케이스와 공개 여부를 관리합니다.</p></div><span class="teacher-count" id="teacher-problem-count">0개</span></div>
+      <div class="teacher-problem-list" id="teacher-problem-list"></div>
+      <p class="account-note" id="teacher-problem-note" aria-live="polite"></p>
+      <form class="teacher-form teacher-problem-form" id="teacher-problem-form">
+        <h3 id="teacher-problem-form-title">새 문제 추가</h3>
+        <label class="account-label" for="problem-title-input">문제 제목</label>
+        <input class="account-input" id="problem-title-input" maxlength="100" required>
+        <label class="account-label" for="problem-difficulty-input">난이도</label>
+        <select class="account-input" id="problem-difficulty-input"><option>입문</option><option>초급</option><option>중급</option><option>고급</option></select>
+        <label class="account-label" for="problem-tags-input">주제 (쉼표로 구분)</label>
+        <input class="account-input" id="problem-tags-input" placeholder="예: 반복문, 문자열">
+        <label class="account-label" for="problem-description-input">문제 본문</label>
+        <textarea class="teacher-textarea" id="problem-description-input" rows="4" required></textarea>
+        <label class="account-label" for="problem-input-description">입력 설명</label>
+        <textarea class="teacher-textarea" id="problem-input-description" rows="2" required></textarea>
+        <label class="account-label" for="problem-output-description">출력 설명</label>
+        <textarea class="teacher-textarea" id="problem-output-description" rows="2" required></textarea>
+        <div class="teacher-sample-fields"><div><label class="account-label" for="problem-sample-input">예제 입력</label><textarea class="teacher-textarea" id="problem-sample-input" rows="3" required></textarea></div><div><label class="account-label" for="problem-sample-output">예제 출력</label><textarea class="teacher-textarea" id="problem-sample-output" rows="3" required></textarea></div></div>
+        <label class="account-label" for="problem-hint-input">힌트</label>
+        <textarea class="teacher-textarea" id="problem-hint-input" rows="2"></textarea>
+        <label class="account-label" for="problem-starter-input">시작 코드</label>
+        <textarea class="teacher-textarea code-textarea" id="problem-starter-input" rows="6" spellcheck="false"></textarea>
+        <label class="account-label" for="problem-answer-input">모범 답안 코드 (선생님만 볼 수 있어요)</label>
+        <textarea class="teacher-textarea code-textarea" id="problem-answer-input" rows="6" spellcheck="false" required></textarea>
+        <div class="teacher-test-heading"><h3>숨김 테스트케이스</h3><button id="add-problem-test" type="button">테스트 추가</button></div>
+        <div id="problem-test-list" class="problem-test-list"></div>
+        <label class="publish-toggle"><input id="problem-published-input" type="checkbox" checked> 학생에게 공개</label>
+        <div class="teacher-problem-actions"><button class="account-submit" id="teacher-problem-submit" type="submit">문제 추가</button><button id="teacher-problem-cancel" type="button" hidden>수정 취소</button></div>
+      </form>
+    </section>
     <form class="teacher-form" id="teacher-pin-form">
       <h3>선생님 PIN 변경</h3>
       <label class="account-label" for="teacher-current-pin">현재 6자리 PIN</label>

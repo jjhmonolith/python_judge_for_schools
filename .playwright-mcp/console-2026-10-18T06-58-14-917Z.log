@@ -1,0 +1,20 @@
+[     256ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[     408ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[     408ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[    7957ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://tqrkp0jyw78bavsd.jitda.io/problems.js:0
+[    7965ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://tqrkp0jyw78bavsd.jitda.io/data/problems.json:0
+[   42333ms] TypeError: Cannot set properties of null (setting 'textContent')
+    at HTMLFormElement.saveTeacherProblem (https://tqrkp0jyw78bavsd.jitda.io/app.js:389:46)
+[   87352ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[   87615ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[   87615ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[  490638ms] [LOG] [vite] server connection lost. Polling for restart... @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[  490649ms] [ERROR] WebSocket connection to 'wss://tqrkp0jyw78bavsd.jitda.io/' failed: Error during WebSocket handshake: Unexpected response code: 503 @ https://tqrkp0jyw78bavsd.jitda.io/@vite/client:1034
+[  492621ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[  492812ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[  492813ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[  502319ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[  502434ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[  502434ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ https://tqrkp0jyw78bavsd.jitda.io/:0
+[  502837ms] [ERROR] Failed to load resource: the server responded with a status of 401 () @ https://tqrkp0jyw78bavsd.jitda.io/api/teacher/problems:0
+[  502847ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://tqrkp0jyw78bavsd.jitda.io/problems.js:0

@@ -11,14 +11,18 @@ const env = loadEnv(production ? "production" : "development", root, "OPENAI_");
 const openAiKey = process.env.OPENAI_API_KEY || env.OPENAI_API_KEY || "";
 const buckets = new Map();
 const loginBuckets = new Map();
+const submissionBuckets = new Map();
 const sessions = new Map();
 const dataDirectory = resolve(root, "data");
 const studentDbPath = resolve(dataDirectory, "students.json");
 const teacherDbPath = resolve(dataDirectory, "teachers.json");
+const problemDbPath = resolve(dataDirectory, "problems.json");
 let studentDb;
 let teacherDb;
+let problemDb;
 let studentWriteQueue = Promise.resolve();
 let teacherWriteQueue = Promise.resolve();
+let problemWriteQueue = Promise.resolve();
 const responseSchema = {
   type: "object",
   properties: {
@@ -124,8 +128,40 @@ async function persistTeachers() {
   return teacherWriteQueue;
 }
 
+async function persistProblems() {
+  problemWriteQueue = problemWriteQueue.then(async () => {
+    await atomicWrite(problemDbPath, JSON.stringify(problemDb, null, 2));
+  });
+  return problemWriteQueue;
+}
+
+function seedProblem(problem, index) {
+  return {
+    id: `problem-${String(index + 1).padStart(3, "0")}`,
+    order: index,
+    title: problem.title,
+    difficulty: problem.difficulty,
+    tags: problem.tags,
+    description: problem.description,
+    input: problem.input,
+    output: problem.output,
+    sampleInput: problem.sampleInput,
+    sampleOutput: problem.sampleOutput,
+    hint: problem.hint,
+    starter: problem.starter,
+    answer: problem.answer,
+    tests: problem.tests.map(([input, output]) => ({ input, output })),
+    published: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+}
+
 async function initializeDatabases() {
   await mkdir(dataDirectory, { recursive: true, mode: 0o700 });
+  problemDb = await loadDatabase(problemDbPath, () => ({
+    problems: PROBLEMS.map(seedProblem)
+  }));
   studentDb = await loadDatabase(studentDbPath, () => {
     const accounts = [
       makeAccount("student01", "111111", "student-001", true),
@@ -133,8 +169,8 @@ async function initializeDatabases() {
       makeAccount("student03", "333333", "student-003", true)
     ];
     const progress = Object.fromEntries(accounts.map((account) => [account.id, {
-      current: 0,
-      solved: [],
+      currentProblemId: "problem-001",
+      solvedIds: [],
       codes: {},
       updatedAt: null
     }]));
@@ -145,8 +181,28 @@ async function initializeDatabases() {
   }));
   studentDb.progress ||= {};
   for (const account of studentDb.accounts) {
-    studentDb.progress[account.id] ||= { current: 0, solved: [], codes: {}, updatedAt: null };
+    studentDb.progress[account.id] ||= { currentProblemId: "problem-001", solvedIds: [], codes: {}, updatedAt: null };
   }
+
+  const legacyProgressEntries = Object.entries(studentDb.progress);
+  for (const [, progress] of legacyProgressEntries) {
+    if (!Array.isArray(progress.solvedIds)) {
+      progress.solvedIds = (progress.solved || []).map((index) => problemDb.problems[index]?.id).filter(Boolean);
+      progress.currentProblemId = problemDb.problems[progress.current || 0]?.id || problemDb.problems[0]?.id || null;
+      progress.codes = Object.fromEntries(Object.entries(progress.codes || {}).flatMap(([index, code]) => {
+        const problemId = problemDb.problems[Number(index)]?.id;
+        return problemId ? [[problemId, code]] : [];
+      }));
+      delete progress.solved;
+      delete progress.current;
+    }
+    if (!progress.currentProblemId || !problemDb.problems.some((problem) => problem.id === progress.currentProblemId)) {
+      progress.currentProblemId = problemDb.problems.find((problem) => problem.published)?.id || null;
+    }
+    progress.solvedIds ||= [];
+    progress.codes ||= {};
+  }
+  await persistStudents();
 }
 
 function pinMatches(account, pin) {
@@ -204,6 +260,17 @@ function loginIsLimited(req) {
   return bucket.count > 40;
 }
 
+function submissionsLimited(studentId) {
+  const now = Date.now();
+  let bucket = submissionBuckets.get(studentId);
+  if (!bucket || now - bucket.startedAt > 60_000) {
+    bucket = { startedAt: now, count: 0 };
+    submissionBuckets.set(studentId, bucket);
+  }
+  bucket.count += 1;
+  return bucket.count > 20;
+}
+
 function looksLikeCode(value) {
   return /```|`|<\/?[a-z][^>]*>/i.test(value)
     || /\b(print|input|range|map|sum|max|min)\s*\(/i.test(value)
@@ -226,11 +293,12 @@ function cleanTutorReply(value) {
 
 function getTutorContext(body) {
   if (!body || !["hint", "error", "wrong"].includes(body.kind)) return null;
-  if (!Number.isInteger(body.problemIndex) || body.problemIndex < 0 || body.problemIndex >= PROBLEMS.length) return null;
+  if (typeof body.problemId !== "string") return null;
+  const problem = problemDb.problems.find((entry) => entry.id === body.problemId && entry.published);
+  if (!problem) return null;
   const code = typeof body.code === "string" ? body.code.slice(0, 12000) : "";
   if (body.kind === "error" && typeof body.error !== "string") return null;
   if (body.kind === "wrong" && (!body.result || !Number.isInteger(body.result.passed) || !Number.isInteger(body.result.total))) return null;
-  const problem = PROBLEMS[body.problemIndex];
   return {
     kind: body.kind,
     hintLevel: Math.max(1, Math.min(Number(body.hintLevel) || 1, 3)),
@@ -314,6 +382,219 @@ async function handleTutor(req, res) {
   }
 }
 
+function publicProblem(problem) {
+  return {
+    id: problem.id,
+    order: problem.order,
+    title: problem.title,
+    difficulty: problem.difficulty,
+    tags: problem.tags,
+    description: problem.description,
+    input: problem.input,
+    output: problem.output,
+    sampleInput: problem.sampleInput,
+    sampleOutput: problem.sampleOutput,
+    hint: problem.hint,
+    starter: problem.starter
+  };
+}
+
+function validateProblem(body) {
+  if (!body || typeof body !== "object") return null;
+  const fields = ["title", "description", "input", "output", "sampleInput", "sampleOutput", "hint", "starter", "answer"];
+  if (fields.some((field) => typeof body[field] !== "string")) return null;
+  if (!body.title.trim() || body.title.length > 100 || body.description.length > 6000
+      || body.input.length > 3000 || body.output.length > 3000 || body.sampleInput.length > 4000
+      || body.sampleOutput.length > 4000 || body.hint.length > 1000 || body.starter.length > 20000 || body.answer.length > 20000) return null;
+  const tags = Array.isArray(body.tags) ? body.tags.filter((tag) => typeof tag === "string").map((tag) => tag.trim()).filter(Boolean).slice(0, 8) : [];
+  if (!Array.isArray(body.tests) || body.tests.length < 1 || body.tests.length > 20) return null;
+  const tests = body.tests.map((test) => ({ input: test?.input, output: test?.output }));
+  if (tests.some((test) => typeof test.input !== "string" || typeof test.output !== "string" || test.input.length > 6000 || test.output.length > 6000)) return null;
+  return {
+    title: body.title.trim(),
+    difficulty: typeof body.difficulty === "string" && body.difficulty.trim() ? body.difficulty.trim().slice(0, 20) : "입문",
+    tags,
+    description: body.description,
+    input: body.input,
+    output: body.output,
+    sampleInput: body.sampleInput,
+    sampleOutput: body.sampleOutput,
+    hint: body.hint,
+    starter: body.starter,
+    answer: body.answer,
+    tests,
+    published: body.published !== false
+  };
+}
+
+function sortedProblems(problems) {
+  return [...problems].sort((left, right) => left.order - right.order || left.title.localeCompare(right.title));
+}
+
+function normalizeOutput(value) {
+  return String(value || "").replace(/\r\n/g, "\n").trim();
+}
+
+async function executeTestCase(code, test) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 12_000);
+  try {
+    const response = await fetch("https://ce.judge0.com/submissions/?base64_encoded=false&wait=true", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      signal: controller.signal,
+      body: JSON.stringify({
+        source_code: code,
+        language_id: 71,
+        stdin: test.input,
+        cpu_time_limit: 1,
+        cpu_extra_time: 0.5,
+        wall_time_limit: 5,
+        memory_limit: 128000,
+        max_processes_and_or_threads: 16,
+        enable_network: false,
+        max_file_size: 1024
+      })
+    });
+    if (!response.ok) throw new Error(`runner_${response.status}`);
+    const result = await response.json();
+    const status = result.status?.id;
+    if (status === 5) return { passed: false, kind: "error", label: "시간 초과" };
+    if (status === 6) return { passed: false, kind: "error", label: "문법 오류" };
+    if (status >= 7 && status <= 12) return { passed: false, kind: "error", label: "실행 오류" };
+    if (status >= 13) throw new Error("runner_error");
+    return normalizeOutput(result.stdout) === normalizeOutput(test.output)
+      ? { passed: true, kind: "pass", label: "통과" }
+      : { passed: false, kind: "wrong", label: "오답" };
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function handleJudge(req, res) {
+  if (req.method !== "POST") return sendJson(res, 405, { message: "올바르지 않은 요청이에요." });
+  const session = requireRole(req, res, "student");
+  if (!session) return;
+  if (submissionsLimited(session.id)) return sendJson(res, 429, { message: "제출이 잠시 많아요. 1분 뒤 다시 시도해 주세요." });
+  const body = await readApiBody(req, res, 16_000);
+  if (!body) return;
+  if (typeof body.problemId !== "string" || typeof body.code !== "string" || !body.code.trim() || body.code.length > 12000) {
+    return sendJson(res, 400, { message: "문제나 코드 내용을 확인해 주세요." });
+  }
+  const problem = problemDb.problems.find((entry) => entry.id === body.problemId && entry.published);
+  if (!problem) return sendJson(res, 404, { message: "공개 중인 문제를 찾을 수 없어요." });
+  if (submissionsLimited(session.id)) return sendJson(res, 429, { message: "제출 횟수가 많아요. 잠시 후 다시 시도해 주세요." });
+
+  try {
+    const cases = new Array(problem.tests.length);
+    let nextIndex = 0;
+    await Promise.all(Array.from({ length: Math.min(4, problem.tests.length) }, async () => {
+      while (nextIndex < problem.tests.length) {
+        const index = nextIndex++;
+        cases[index] = await executeTestCase(body.code, problem.tests[index]);
+      }
+    }));
+    const passedCount = cases.filter((test) => test.passed).length;
+    const hasExecutionError = cases.some((test) => test.kind === "error");
+    const allPassed = passedCount === cases.length;
+    const progress = studentDb.progress[session.id] || { currentProblemId: problem.id, solvedIds: [], codes: {}, updatedAt: null };
+    progress.currentProblemId = problem.id;
+    progress.codes[problem.id] = body.code;
+    if (allPassed && !progress.solvedIds.includes(problem.id)) progress.solvedIds.push(problem.id);
+    progress.updatedAt = new Date().toISOString();
+    studentDb.progress[session.id] = progress;
+    await persistStudents();
+    return sendJson(res, 200, {
+      accepted: allPassed,
+      kind: hasExecutionError ? "error" : allPassed ? "accepted" : "wrong",
+      error: cases.find((test) => test.kind === "error")?.label || "",
+      passed: passedCount,
+      total: cases.length,
+      cases: cases.map(({ passed, label }) => ({ passed, label }))
+    });
+  } catch {
+    return sendJson(res, 502, { message: "안전 채점 서비스에 연결하지 못했어요. 잠시 후 다시 제출해 주세요." });
+  }
+}
+
+async function handleProblemApi(req, res, pathname) {
+  if (pathname === "/api/problems" && req.method === "GET") {
+    const problems = sortedProblems(problemDb.problems.filter((problem) => problem.published)).map(publicProblem);
+    return sendJson(res, 200, { problems });
+  }
+
+  if (pathname === "/api/teacher/problems" && req.method === "GET") {
+    if (!requireRole(req, res, "teacher")) return;
+    return sendJson(res, 200, { problems: sortedProblems(problemDb.problems) });
+  }
+
+  if (pathname === "/api/teacher/problems" && req.method === "POST") {
+    if (!requireRole(req, res, "teacher")) return;
+    const body = await readApiBody(req, res, 260_000);
+    if (!body) return;
+    const content = validateProblem(body);
+    if (!content) return sendJson(res, 400, { message: "문제 내용을 확인해 주세요. 테스트케이스를 하나 이상 입력해야 해요." });
+    const problem = {
+      ...content,
+      id: randomUUID(),
+      order: problemDb.problems.reduce((highest, entry) => Math.max(highest, entry.order), -1) + 1,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    problemDb.problems.push(problem);
+    await persistProblems();
+    return sendJson(res, 201, { problem });
+  }
+
+  const visibilityMatch = pathname.match(/^\/api\/teacher\/problems\/([^/]+)\/visibility$/);
+  if (visibilityMatch && req.method === "PUT") {
+    if (!requireRole(req, res, "teacher")) return;
+    const body = await readApiBody(req, res, 2_000);
+    if (!body) return;
+    if (typeof body.published !== "boolean") return sendJson(res, 400, { message: "공개 여부가 올바르지 않아요." });
+    const problem = problemDb.problems.find((entry) => entry.id === visibilityMatch[1]);
+    if (!problem) return sendJson(res, 404, { message: "문제를 찾을 수 없어요." });
+    problem.published = body.published;
+    problem.updatedAt = new Date().toISOString();
+    await persistProblems();
+    return sendJson(res, 200, { id: problem.id, published: problem.published });
+  }
+
+  const problemMatch = pathname.match(/^\/api\/teacher\/problems\/([^/]+)$/);
+  if (problemMatch && req.method === "PUT") {
+    if (!requireRole(req, res, "teacher")) return;
+    const body = await readApiBody(req, res, 260_000);
+    if (!body) return;
+    const content = validateProblem(body);
+    if (!content) return sendJson(res, 400, { message: "문제 내용을 확인해 주세요. 테스트케이스를 하나 이상 입력해야 해요." });
+    const index = problemDb.problems.findIndex((entry) => entry.id === problemMatch[1]);
+    if (index < 0) return sendJson(res, 404, { message: "문제를 찾을 수 없어요." });
+    const current = problemDb.problems[index];
+    problemDb.problems[index] = { ...current, ...content, updatedAt: new Date().toISOString() };
+    await persistProblems();
+    return sendJson(res, 200, { problem: problemDb.problems[index] });
+  }
+
+  if (problemMatch && req.method === "DELETE") {
+    if (!requireRole(req, res, "teacher")) return;
+    const index = problemDb.problems.findIndex((entry) => entry.id === problemMatch[1]);
+    if (index < 0) return sendJson(res, 404, { message: "문제를 찾을 수 없어요." });
+    const [deleted] = problemDb.problems.splice(index, 1);
+    for (const progress of Object.values(studentDb.progress)) {
+      progress.solvedIds = (progress.solvedIds || []).filter((id) => id !== deleted.id);
+      if (progress.codes) delete progress.codes[deleted.id];
+      if (progress.currentProblemId === deleted.id) {
+        progress.currentProblemId = problemDb.problems.find((problem) => problem.published)?.id || null;
+      }
+    }
+    await persistProblems();
+    await persistStudents();
+    return sendJson(res, 200, { ok: true });
+  }
+
+  return false;
+}
+
 async function readApiBody(req, res, maxBytes = 24_000) {
   try { return await readRequestBody(req, maxBytes); }
   catch (error) {
@@ -362,7 +643,7 @@ async function handleAccountApi(req, res, pathname) {
   if (pathname === "/api/student/progress" && req.method === "GET") {
     const session = requireRole(req, res, "student");
     if (!session) return;
-    return sendJson(res, 200, studentDb.progress[session.id] || { current: 0, solved: [], codes: {}, updatedAt: null });
+    return sendJson(res, 200, studentDb.progress[session.id] || { currentProblemId: null, solvedIds: [], codes: {}, updatedAt: null });
   }
 
   if (pathname === "/api/student/progress" && req.method === "PUT") {
@@ -370,16 +651,17 @@ async function handleAccountApi(req, res, pathname) {
     if (!session) return;
     const body = await readApiBody(req, res, 220_000);
     if (!body) return;
-    if (!Number.isInteger(body.current) || body.current < 0 || body.current >= PROBLEMS.length
-        || !Array.isArray(body.solved) || body.solved.length > PROBLEMS.length
-        || body.solved.some((index) => !Number.isInteger(index) || index < 0 || index >= PROBLEMS.length)
+    if (typeof body.currentProblemId !== "string"
+        || !problemDb.problems.some((problem) => problem.id === body.currentProblemId && problem.published)
+        || !Array.isArray(body.solvedIds) || body.solvedIds.length > 500
+        || body.solvedIds.some((id) => typeof id !== "string" || !problemDb.problems.some((problem) => problem.id === id))
         || !body.codes || typeof body.codes !== "object" || Array.isArray(body.codes)
         || JSON.stringify(body.codes).length > 200_000) {
       return sendJson(res, 400, { message: "풀이 기록 형식이 올바르지 않아요." });
     }
     studentDb.progress[session.id] = {
-      current: body.current,
-      solved: [...new Set(body.solved)],
+      currentProblemId: body.currentProblemId,
+      solvedIds: [...new Set(body.solvedIds)],
       codes: body.codes,
       updatedAt: new Date().toISOString()
     };
@@ -391,12 +673,14 @@ async function handleAccountApi(req, res, pathname) {
     if (!requireRole(req, res, "teacher")) return;
     const students = studentDb.accounts
       .map((account) => {
-        const progress = studentDb.progress[account.id] || { solved: [], current: 0, updatedAt: null };
+        const progress = studentDb.progress[account.id] || { solvedIds: [], currentProblemId: null, updatedAt: null };
+        const currentProblem = problemDb.problems.find((problem) => problem.id === progress.currentProblemId);
         return {
           id: account.id,
           username: account.username,
-          solvedCount: progress.solved.length,
-          currentProblem: progress.current,
+          solvedCount: progress.solvedIds.filter((id) => problemDb.problems.some((problem) => problem.id === id && problem.published)).length,
+          totalProblems: problemDb.problems.filter((problem) => problem.published).length,
+          currentProblem: currentProblem?.title || "아직 시작하지 않음",
           updatedAt: progress.updatedAt,
           demo: Boolean(account.demo)
         };
@@ -443,7 +727,7 @@ async function handleAccountApi(req, res, pathname) {
     if (studentDb.accounts.length >= 500) return sendJson(res, 409, { message: "학생 계정은 최대 500개까지 만들 수 있어요." });
     const account = makeAccount(username, pin);
     studentDb.accounts.push(account);
-    studentDb.progress[account.id] = { current: 0, solved: [], codes: {}, updatedAt: null };
+    studentDb.progress[account.id] = { currentProblemId: problemDb.problems.find((problem) => problem.published)?.id || null, solvedIds: [], codes: {}, updatedAt: null };
     await persistStudents();
     return sendJson(res, 201, { id: account.id, username: account.username });
   }
@@ -492,6 +776,9 @@ const server = createServer((req, res) => {
   if (pathname.startsWith("/api/")) {
     void (async () => {
       if (pathname === "/api/tutor") return handleTutor(req, res);
+      if (pathname === "/api/judge") return handleJudge(req, res);
+      const problemHandled = await handleProblemApi(req, res, pathname);
+      if (problemHandled !== false) return;
       const handled = await handleAccountApi(req, res, pathname);
       if (!handled && !res.writableEnded) sendJson(res, 404, { message: "요청한 기능을 찾을 수 없어요." });
     })();
@@ -559,7 +846,7 @@ if (!production) {
     server: {
       middlewareMode: true,
       hmr: { server },
-      fs: { deny: [".env", ".env.*", "*.{crt,pem}", "**/.git/**", "**/data/**"] }
+      fs: { deny: [".env", ".env.*", "*.{crt,pem}", "**/.git/**", "**/data/**", "**/problems.js"] }
     },
     appType: "custom"
   });

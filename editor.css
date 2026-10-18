@@ -3,33 +3,3 @@
   align-items: center;
   gap: 10px;
 }
-
-.answer-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  min-height: 34px;
-  padding: 0 4px;
-  border: 0;
-  background: transparent;
-  color: #4f7958;
-  font-size: 9px;
-  font-weight: 700;
-}
-
-.answer-button:hover {
-  color: #315640;
-}
-
-.answer-button:focus-visible {
-  outline: 2px solid #6c9872;
-  outline-offset: 2px;
-}
-
-.answer-button span {
-  padding: 2px 3px;
-  border-radius: 3px;
-  background: #eaf1e8;
-  font: 10px var(--mono);
-}
