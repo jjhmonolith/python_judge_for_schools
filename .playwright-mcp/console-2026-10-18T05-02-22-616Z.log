@@ -47,3 +47,21 @@
 [ 2408440ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
 [ 2429809ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
 [ 2447415ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[ 2728120ms] [LOG] [vite] server connection lost. Polling for restart... @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[ 2728140ms] [ERROR] WebSocket connection to 'wss://tqrkp0jyw78bavsd.jitda.io/' failed: Error during WebSocket handshake: Unexpected response code: 503 @ https://tqrkp0jyw78bavsd.jitda.io/@vite/client:1034
+[ 2729225ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[ 2856417ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[ 2881331ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[ 2881633ms] ReferenceError: showTutorHint is not defined
+    at https://tqrkp0jyw78bavsd.jitda.io/app.js?t=1792302623726:558:46
+    at https://tqrkp0jyw78bavsd.jitda.io/app.js?t=1792302623726:607:3
+[ 2890417ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[ 2907234ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[ 2931628ms] [INFO] [preview-bridge] v1.1.0 @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[ 2937954ms] [LOG] [vite] server connection lost. Polling for restart... @ https://tqrkp0jyw78bavsd.jitda.io/__preview-bridge.js:1
+[ 2937965ms] [ERROR] WebSocket connection to 'wss://tqrkp0jyw78bavsd.jitda.io/' failed: Error during WebSocket handshake: Unexpected response code: 503 @ https://tqrkp0jyw78bavsd.jitda.io/@vite/client:1034
+[ 2938982ms] [ERROR] WebSocket connection to 'wss://tqrkp0jyw78bavsd.jitda.io/' failed: Error during WebSocket handshake: Unexpected response code: 404 @ https://tqrkp0jyw78bavsd.jitda.io/@vite/client:1034
+[ 2939991ms] [ERROR] WebSocket connection to 'wss://tqrkp0jyw78bavsd.jitda.io/' failed: Error during WebSocket handshake: Unexpected response code: 404 @ https://tqrkp0jyw78bavsd.jitda.io/@vite/client:1034
+[ 2940997ms] [ERROR] WebSocket connection to 'wss://tqrkp0jyw78bavsd.jitda.io/' failed: Error during WebSocket handshake: Unexpected response code: 404 @ https://tqrkp0jyw78bavsd.jitda.io/@vite/client:1034
+[ 2942004ms] [ERROR] WebSocket connection to 'wss://tqrkp0jyw78bavsd.jitda.io/' failed: Error during WebSocket handshake: Unexpected response code: 404 @ https://tqrkp0jyw78bavsd.jitda.io/@vite/client:1034
+[ 2943012ms] [ERROR] WebSocket connection to 'wss://tqrkp0jyw78bavsd.jitda.io/' failed: Error during WebSocket handshake: Unexpected response code: 404 @ https://tqrkp0jyw78bavsd.jitda.io/@vite/client:1034

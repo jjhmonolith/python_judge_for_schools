@@ -25,6 +25,8 @@ import { PROBLEMS } from "./problems.js";
   let cloudErrorShown = false;
   let lastTutorRun = null;
   const tutorHintLevels = {};
+  let tutorBusy = false;
+  let tutorController = null;
 
   function loadProgress(key = storageKey) {
     try { return JSON.parse(localStorage.getItem(key)) || {}; }
@@ -264,6 +266,9 @@ import { PROBLEMS } from "./problems.js";
   }
 
   function renderProblem() {
+    tutorController?.abort();
+    tutorController = null;
+    tutorBusy = false;
     const problem = problems[currentIndex];
     $("#breadcrumb-title").textContent = `문제 ${String(currentIndex + 1).padStart(2, "0")}`;
     $("#problem-number").textContent = String(currentIndex + 1).padStart(2, "0");
@@ -386,8 +391,9 @@ import { PROBLEMS } from "./problems.js";
   }
 
   function updateTutorButtons() {
-    $("#tutor-error").disabled = lastTutorRun?.kind !== "error";
-    $("#tutor-wrong").disabled = lastTutorRun?.kind !== "wrong";
+    $("#tutor-hint").disabled = tutorBusy || (tutorHintLevels[currentIndex] || 0) >= 3;
+    $("#tutor-error").disabled = tutorBusy || lastTutorRun?.kind !== "error";
+    $("#tutor-wrong").disabled = tutorBusy || lastTutorRun?.kind !== "wrong";
   }
 
   function showTutorResponse(title, message) {
@@ -396,67 +402,51 @@ import { PROBLEMS } from "./problems.js";
     $("#tutor-response").hidden = false;
   }
 
-  function nextHintQuestion(problem, code, level) {
-    const tags = problem.tags.join(" ");
-    if (!code.trim() && level === 1) return "입력 조건에서 프로그램이 받아야 하는 값은 무엇인지 먼저 표시해 보세요.";
-    if (tags.includes("반복문")) return level === 1 ? "몇 번 반복해야 하는지, 반복의 시작과 끝을 문제에서 찾아볼까요?" : "반복을 한 번 수행할 때 값이 어떻게 바뀌는지 예제로 따라가 보세요.";
-    if (tags.includes("조건문")) return level === 1 ? "입력에 따라 나뉘는 경우를 두 가지로 나눠 말해볼까요?" : "조건이 참일 때와 거짓일 때 각각 어떤 결과가 나와야 하나요?";
-    if (tags.includes("문자열")) return level === 1 ? "문자열의 어떤 부분을 바꾸거나 세어야 하는지 찾아보세요." : "문자열을 한 글자씩 살펴본다고 생각하고 순서를 적어보세요.";
-    if (tags.includes("리스트")) return level === 1 ? "입력된 값들을 한 묶음으로 보고, 그중 어떤 값을 찾아야 하나요?" : "리스트의 각 값을 비교하거나 합치는 과정이 필요한지 생각해 보세요.";
-    return level === 1 ? "입력, 처리, 출력 중 아직 코드로 옮기지 않은 단계가 있나요?" : "예제 입력을 손으로 계산해 보고, 필요한 계산 순서를 적어보세요.";
-  }
+  async function requestTutor(kind) {
+    if (tutorBusy) return;
+    const requestIndex = currentIndex;
+    const requestCode = editor.value;
+    const hintLevel = Math.min((tutorHintLevels[requestIndex] || 0) + 1, 3);
+    const controller = new AbortController();
+    tutorController = controller;
+    tutorBusy = true;
+    updateTutorButtons();
+    showTutorResponse("튜터가 생각하고 있어요", "문제와 작성한 코드를 살펴보고 있습니다.");
 
-  function showTutorHint() {
-    const problem = problems[currentIndex];
-    const code = editor.value;
-    const level = Math.min(tutorHintLevels[currentIndex] || 0, 2);
-    tutorHintLevels[currentIndex] = Math.min(level + 1, 3);
-    const title = `생각 힌트 ${level + 1} / 3`;
-    const message = level === 0
-      ? `${problem.hint}\n\n먼저 생각해 볼 점: ${nextHintQuestion(problem, code, 1)}`
-      : level === 1
-        ? nextHintQuestion(problem, code, 2)
-        : "예제 입력을 종이에 적고, 코드가 각 단계에서 어떤 값을 다루는지 하나씩 따라가 보세요. 정답 코드는 보여주지 않아요.";
-    showTutorResponse(title, message);
-  }
-
-  function explainTutorError() {
-    if (lastTutorRun?.kind !== "error") return;
-    const error = lastTutorRun.message || "";
-    const lower = error.toLowerCase();
-    let explanation = "오류가 난 줄 주변에서 변수 이름, 입력 형식, 들여쓰기를 차례로 확인해 보세요.";
-    if (lower.includes("syntax") || lower.includes("invalid syntax") || lower.includes("indent")) {
-      explanation = "파이썬 문장 모양이나 들여쓰기가 맞지 않을 때 생기는 오류예요. 표시된 줄과 바로 앞 줄의 괄호, 따옴표, 콜론, 들여쓰기를 살펴보세요.";
-    } else if (lower.includes("not defined") || lower.includes("nameerror")) {
-      explanation = "아직 만들어지지 않은 이름을 사용했거나 변수 이름이 서로 다를 때 생겨요. 오류에 나온 이름이 앞에서 같은 철자로 정해졌는지 확인해 보세요.";
-    } else if (lower.includes("invalid literal") || lower.includes("could not convert") || lower.includes("valueerror")) {
-      explanation = "문자열을 숫자로 바꾸는 과정에서 숫자가 아닌 값이 들어왔을 수 있어요. 입력을 나누는 방법과 숫자로 바꾸는 위치를 확인해 보세요.";
-    } else if (lower.includes("eof") || lower.includes("input")) {
-      explanation = "준비된 입력보다 더 많이 읽으려 했을 수 있어요. 문제의 입력 줄 수와 코드에서 입력을 읽는 횟수를 비교해 보세요.";
-    } else if (lower.includes("index") || lower.includes("out of range")) {
-      explanation = "리스트나 문자열에 없는 위치를 꺼내려 했을 수 있어요. 위치 번호가 자료의 범위 안에 있는지 확인해 보세요.";
-    } else if (lower.includes("division by zero")) {
-      explanation = "0으로 나누려 해서 멈췄어요. 나누는 값이 0이 될 수 있는 경우를 먼저 확인해 보세요.";
-    } else if (lower.includes("type") || lower.includes("unsupported operand")) {
-      explanation = "서로 다른 종류의 값을 바로 계산하려 했을 수 있어요. 숫자와 문자열을 구분하고, 필요한 값이 알맞은 형태인지 살펴보세요.";
+    try {
+      const response = await fetch("/api/tutor", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        signal: controller.signal,
+        body: JSON.stringify({
+          kind,
+          problemIndex: requestIndex,
+          code: requestCode,
+          hintLevel: kind === "hint" ? hintLevel : undefined,
+          error: kind === "error" ? lastTutorRun?.message : undefined,
+          result: kind === "wrong" ? { passed: lastTutorRun?.passed, total: lastTutorRun?.total } : undefined
+        })
+      });
+      const reply = await response.json();
+      if (!response.ok) throw new Error(reply.message || "튜터에 연결하지 못했어요.");
+      if (controller.signal.aborted) return;
+      if (currentIndex !== requestIndex || editor.value !== requestCode) {
+        showTutorResponse("코드가 바뀌었어요", "현재 작성한 코드 기준으로 다시 도움을 요청해 주세요.");
+        return;
+      }
+      if (kind === "hint") tutorHintLevels[requestIndex] = hintLevel;
+      showTutorResponse(reply.title, `${reply.message}\n\n생각해 볼 질문: ${reply.question}`);
+    } catch (error) {
+      if (!controller.signal.aborted) {
+        showTutorResponse("튜터에 연결하지 못했어요", error.message || "잠시 후 다시 시도해 주세요.");
+      }
+    } finally {
+      if (tutorController === controller) {
+        tutorController = null;
+        tutorBusy = false;
+        updateTutorButtons();
+      }
     }
-    showTutorResponse("오류 설명", `${explanation}\n\n파이썬 메시지: ${error}`);
-  }
-
-  function analyzeTutorWrongAnswer() {
-    if (lastTutorRun?.kind !== "wrong") return;
-    const problem = problems[currentIndex];
-    const code = editor.value;
-    let question = "예제 입력의 가장 작은 값과 가장 큰 값에서도 결과가 맞는지 확인해 볼까요?";
-    if (!/print\s*\(/.test(code)) question = "계산한 결과를 출력하는 부분이 있는지 먼저 확인해 보세요.";
-    else if (!/input\s*\(/.test(code)) question = "문제에서 요구한 입력을 코드가 실제로 읽고 있는지 확인해 보세요.";
-    else if (problem.tags.includes("반복문")) question = "반복 횟수와 마지막 반복에서의 결과가 문제의 조건과 일치하나요?";
-    else if (problem.tags.includes("조건문")) question = "각 조건의 경계값에서 어느 쪽 분기가 실행되는지 직접 따라가 보세요.";
-    else if (problem.tags.includes("문자열")) question = "문자열이 한 글자이거나 순서를 바꿔야 하는 경우도 생각해 봤나요?";
-    showTutorResponse(
-      "오답 점검",
-      `${lastTutorRun.passed}개 테스트를 통과했고 ${lastTutorRun.total - lastTutorRun.passed}개에서 결과가 달랐어요. 숨겨진 입력과 정답은 보여주지 않아요.\n\n먼저 확인할 질문: ${question}`
-    );
   }
 
   function escapeHtml(value) {
@@ -470,6 +460,9 @@ import { PROBLEMS } from "./problems.js";
       return;
     }
     if (activeWorker) activeWorker.terminate();
+    tutorController?.abort();
+    tutorController = null;
+    tutorBusy = false;
     lastTutorRun = null;
     $("#tutor-response").hidden = true;
     updateTutorButtons();
@@ -528,6 +521,9 @@ import { PROBLEMS } from "./problems.js";
 
   editor.addEventListener("input", () => {
     updateLineNumbers();
+    tutorController?.abort();
+    tutorController = null;
+    tutorBusy = false;
     lastTutorRun = null;
     $("#tutor-response").hidden = true;
     updateTutorButtons();
@@ -565,10 +561,16 @@ import { PROBLEMS } from "./problems.js";
     editor.focus();
     showToast("모범 답안을 편집기에 입력했어요.");
   });
-  $("#tutor-hint").addEventListener("click", showTutorHint);
-  $("#tutor-error").addEventListener("click", explainTutorError);
-  $("#tutor-wrong").addEventListener("click", analyzeTutorWrongAnswer);
-  $("#tutor-close").addEventListener("click", () => { $("#tutor-response").hidden = true; });
+  $("#tutor-hint").addEventListener("click", () => requestTutor("hint"));
+  $("#tutor-error").addEventListener("click", () => requestTutor("error"));
+  $("#tutor-wrong").addEventListener("click", () => requestTutor("wrong"));
+  $("#tutor-close").addEventListener("click", () => {
+    tutorController?.abort();
+    tutorController = null;
+    tutorBusy = false;
+    $("#tutor-response").hidden = true;
+    updateTutorButtons();
+  });
   submitButton.addEventListener("click", () => runCode(false));
   sampleButton.addEventListener("click", () => runCode(true));
   document.addEventListener("keydown", (event) => {
